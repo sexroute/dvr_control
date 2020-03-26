@@ -1180,6 +1180,10 @@
                     String lstrData = this.GetData();
                     try
                     {
+                        if(String.IsNullOrEmpty(lstrData))
+                        {
+                            continue;
+                        }
                         Newtonsoft.Json.Linq.JObject json = null;
                         try
                         {
@@ -1187,6 +1191,7 @@
                         }
                         catch(Exception e)
                         {
+                            ThreadUiController.log("Parsing data Error:"+lstrData, ThreadUiController.LOG_LEVEL.FATAL);
                             ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
                             continue;
                         }
