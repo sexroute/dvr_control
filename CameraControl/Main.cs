@@ -91,12 +91,12 @@
             {
                 if (this.cameraControl.MixerEnabled)
                 {
-                    this.buttonMixerOnOff.Text = "显示字幕";
+                   
                     this.UpdateCameraBitmap();
                 }
                 else
                 {
-                    this.buttonMixerOnOff.Text = "隐藏字幕";
+                  
                     this.UpdateCameraBitmap();
                 }
                 this.cameraControl.MixerEnabled = !this.cameraControl.MixerEnabled;
@@ -927,7 +927,7 @@
 
         private void UpdateGUIButtons()
         {
-            this.buttonCrossbarSettings.Enabled = this.cameraControl.CrossbarAvailable;
+           
         }
 
         private void UpdateUnzoomButton()
