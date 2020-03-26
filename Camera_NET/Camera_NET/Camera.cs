@@ -44,7 +44,7 @@
                     IAMVfwCompressDialogs dialogs = filter_or_pin as IAMVfwCompressDialogs;
                     if (dialogs != null)
                     {
-                        DsError.ThrowExceptionForHR(dialogs.ShowDialog(VfwCompressDialogs.Config, IntPtr.Zero));
+                    /*    DsError.ThrowExceptionForHR(dialogs.ShowDialog(VfwCompressDialogs.Config, IntPtr.Zero));*/
                     }
                 }
                 else
@@ -55,19 +55,19 @@
                     {
                         FilterInfo info;
                         IBaseFilter filter = filter_or_pin as IBaseFilter;
-                        DsError.ThrowExceptionForHR(filter.QueryFilterInfo(out info));
-                        lpszCaption = info.achName;
-                        if (info.pGraph != null)
-                        {
-                            Marshal.ReleaseComObject(info.pGraph);
-                        }
+//                         DsError.ThrowExceptionForHR(filter.QueryFilterInfo(out info));
+//                         lpszCaption = info.achName;
+//                         if (info.pGraph != null)
+//                         {
+//                             Marshal.ReleaseComObject(info.pGraph);
+//                         }
                     }
                     else if (filter_or_pin is IPin)
                     {
                         PinInfo info2;
                         IPin pin = filter_or_pin as IPin;
-                        DsError.ThrowExceptionForHR(pin.QueryPinInfo(out info2));
-                        lpszCaption = info2.name;
+                       /* DsError.ThrowExceptionForHR(pin.QueryPinInfo(out info2));*/
+                       /* lpszCaption = info2.name;*/
                     }
                     DsError.ThrowExceptionForHR(o.GetPages(out scauuid));
                     object ppUnk = filter_or_pin;

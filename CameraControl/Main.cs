@@ -342,23 +342,31 @@
             this.comboBoxResolutionList.Items.Clear();
             if (this.cameraControl.CameraCreated)
             {
-                ResolutionList resolutionList = Camera.GetResolutionList(this.cameraControl.Moniker);
-                if (resolutionList != null)
+                try
                 {
-                    int num = -1;
-                    for (int i = 0; i < resolutionList.Count; i++)
+                    ResolutionList resolutionList = Camera.GetResolutionList(this.cameraControl.Moniker);
+                    if (resolutionList != null)
                     {
-                        this.comboBoxResolutionList.Items.Add(resolutionList[i].ToString());
-                        if (resolutionList[i].CompareTo(this.cameraControl.Resolution) == 0)
+                        int num = -1;
+                        for (int i = 0; i < resolutionList.Count; i++)
                         {
-                            num = i;
+                            this.comboBoxResolutionList.Items.Add(resolutionList[i].ToString());
+                            if (resolutionList[i].CompareTo(this.cameraControl.Resolution) == 0)
+                            {
+                                num = i;
+                            }
+                        }
+                        if (num >= 0)
+                        {
+                            this.comboBoxResolutionList.SelectedIndex = num;
                         }
                     }
-                    if (num >= 0)
-                    {
-                        this.comboBoxResolutionList.SelectedIndex = num;
-                    }
                 }
+                catch(Exception e)
+                {
+                    ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                }
+
             }
         }
 
@@ -428,7 +436,7 @@
                 brush.Dispose();
             }
             Font font2 = new Font("Tahoma", 16f);
-            Brush brush2 = new SolidBrush(Color.Blue);
+            Brush brush2 = new SolidBrush(Color.BlueViolet);
             string text = this.textBoxZiMu.Text;
             graphics.DrawString(text, font2, brush2, 4f, (float) (height - 30));
             graphics.Dispose();
@@ -672,6 +680,7 @@
             // 
             // buttonMixerOnOff
             // 
+            this.buttonMixerOnOff.Enabled = false;
             this.buttonMixerOnOff.Location = new System.Drawing.Point(122, 52);
             this.buttonMixerOnOff.Name = "buttonMixerOnOff";
             this.buttonMixerOnOff.Size = new System.Drawing.Size(69, 30);
@@ -824,7 +833,7 @@
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 1000;
+            this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Main
