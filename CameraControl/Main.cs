@@ -607,7 +607,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.splitContainer1.Panel1.Controls.Add(this.textBoxZiMu);
             this.splitContainer1.Panel1.Controls.Add(this.label1);
             this.splitContainer1.Panel1.Controls.Add(this.groupBox2);
@@ -674,6 +674,7 @@
             this.buttonTVMode.TabIndex = 13;
             this.buttonTVMode.Text = "获取当前TV模式";
             this.buttonTVMode.UseVisualStyleBackColor = true;
+            this.buttonTVMode.Visible = false;
             this.buttonTVMode.Click += new System.EventHandler(this.buttonTVMode_Click);
             // 
             // buttonPinOutputSettings
@@ -695,6 +696,7 @@
             this.buttonMixerOnOff.TabIndex = 15;
             this.buttonMixerOnOff.Text = "隐藏字幕";
             this.buttonMixerOnOff.UseVisualStyleBackColor = true;
+            this.buttonMixerOnOff.Visible = false;
             this.buttonMixerOnOff.Click += new System.EventHandler(this.buttonMixerOnOff_Click);
             // 
             // buttonCrossbarSettings
@@ -1015,6 +1017,7 @@
 
         }
         BarcodeReader reader = new BarcodeReader();
+        
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (this.cameraControl.CameraCreated)
@@ -1038,7 +1041,7 @@
                                     this.PushData(result.Text);
                                 }
                                 this.UpdateCameraBitmap();
-                                ThreadUiController.Feed();
+                               
                             }
 
                         }
@@ -1175,6 +1178,7 @@
         {
             while (true)
             {
+                Boolean lbSucceed = false;
                 try
                 {
                     String lstrData = this.GetData();
@@ -1208,8 +1212,15 @@
                                 }
                             }
 
-                            if (String.IsNullOrEmpty(lstrAlarmIDParsed) || String.Compare(Text,this.AlarmIDLast)==0)
+                            if (String.IsNullOrEmpty(lstrAlarmIDParsed))
                             {
+                                continue;
+                            }
+
+
+                            if ( String.Compare(Text, this.AlarmIDLast) == 0)
+                            {
+                                lbSucceed = true;
                                 continue;
                             }
 
@@ -1222,6 +1233,7 @@
                                 {
                                     this.AlarmIDLast = lstrAlarmIDParsed;
                                     this.saveSetting();
+                                    lbSucceed = true;
                                 }
                             }
                         }
@@ -1229,6 +1241,12 @@
                     catch (Exception e)
                     {
                         this.PushData(lstrData);
+                    }finally
+                    {
+                        if(lbSucceed)
+                        {
+                            ThreadUiController.Feed();
+                        }
                     }
                 }
                 catch (Exception e)
