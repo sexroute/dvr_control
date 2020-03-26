@@ -93,10 +93,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\DirectShowLib-2010.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="CameraControl\ThreadUiController.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="CameraControl\About.cs">
       <SubType>Form</SubType>

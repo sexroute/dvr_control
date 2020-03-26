@@ -13,6 +13,7 @@
     using System.Runtime.InteropServices.ComTypes;
     using System.Windows.Forms;
     using ZXing;
+    using EricZhao.UiThread;
 
     public class Main : Form
     {
@@ -1015,6 +1016,7 @@
                             {
                                 this.textBoxZiMu.Text = result.Text;
                                 this.UpdateCameraBitmap();
+                                ThreadUiController.Feed();
                             }
    
                         }
@@ -1023,6 +1025,7 @@
                 }
                 catch (Exception exception1)
                 {
+                    ThreadUiController.log(exception1.Message, ThreadUiController.LOG_LEVEL.FATAL);
                    // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
                 }
                
