@@ -906,7 +906,7 @@
             {
                 Marshal.FreeCoTaskMem(zero);
             }
-            return bitmap2;
+           
         }
 
         public Bitmap SnapshotSourceImage()

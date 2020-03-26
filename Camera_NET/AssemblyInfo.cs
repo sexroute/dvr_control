@@ -3,7 +3,6 @@
 [assembly: System.Runtime.CompilerServices.CompilationRelaxations(8)]
 [assembly: System.Runtime.CompilerServices.RuntimeCompatibility(WrapNonExceptionThrows=true)]
 [assembly: System.Reflection.AssemblyTitle("Camera_NET")]
-[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.0,Profile=Client", FrameworkDisplayName=".NET Framework 4 Client Profile")]
 [assembly: System.Reflection.AssemblyDescription("Camera .NET wrapper for DirectShow")]
 [assembly: System.Reflection.AssemblyConfiguration("")]
 [assembly: System.Reflection.AssemblyCompany("")]
