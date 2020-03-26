@@ -29,13 +29,10 @@
         private NormalizedRect _MouseSelectionRect = new NormalizedRect(0f, 0f, 0f, 0f);
         private Button buttonCameraSettings;
         private Button buttonClearSnapshotFrame;
-        private Button buttonCrossbarSettings;
-        private Button buttonMixerOnOff;
         private Button buttonPinOutputSettings;
         private Button buttonSaveSnapshotFrame;
         private Button buttonSnapshotNextSourceFrame;
         private Button buttonSnapshotOutputFrame;
-        private Button buttonTVMode;
         private Button buttonUnZoom;
         private ComboBox comboBoxCameraList;
         private ComboBox comboBoxResolutionList;
@@ -471,10 +468,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.buttonCameraSettings = new System.Windows.Forms.Button();
-            this.buttonTVMode = new System.Windows.Forms.Button();
             this.buttonPinOutputSettings = new System.Windows.Forms.Button();
-            this.buttonMixerOnOff = new System.Windows.Forms.Button();
-            this.buttonCrossbarSettings = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonSaveSnapshotFrame = new System.Windows.Forms.Button();
             this.buttonSnapshotOutputFrame = new System.Windows.Forms.Button();
@@ -645,70 +639,33 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.buttonCameraSettings);
-            this.groupBox2.Controls.Add(this.buttonTVMode);
             this.groupBox2.Controls.Add(this.buttonPinOutputSettings);
-            this.groupBox2.Controls.Add(this.buttonMixerOnOff);
-            this.groupBox2.Controls.Add(this.buttonCrossbarSettings);
-            this.groupBox2.Location = new System.Drawing.Point(14, 108);
+            this.groupBox2.Location = new System.Drawing.Point(14, 114);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(198, 120);
+            this.groupBox2.Size = new System.Drawing.Size(198, 99);
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "设置";
             // 
             // buttonCameraSettings
             // 
-            this.buttonCameraSettings.Location = new System.Drawing.Point(11, 20);
+            this.buttonCameraSettings.Location = new System.Drawing.Point(11, 26);
             this.buttonCameraSettings.Name = "buttonCameraSettings";
-            this.buttonCameraSettings.Size = new System.Drawing.Size(101, 30);
+            this.buttonCameraSettings.Size = new System.Drawing.Size(175, 30);
             this.buttonCameraSettings.TabIndex = 11;
             this.buttonCameraSettings.Text = "属性";
             this.buttonCameraSettings.UseVisualStyleBackColor = true;
             this.buttonCameraSettings.Click += new System.EventHandler(this.buttonCameraSettings_Click);
             // 
-            // buttonTVMode
-            // 
-            this.buttonTVMode.Location = new System.Drawing.Point(11, 52);
-            this.buttonTVMode.Name = "buttonTVMode";
-            this.buttonTVMode.Size = new System.Drawing.Size(103, 30);
-            this.buttonTVMode.TabIndex = 13;
-            this.buttonTVMode.Text = "获取当前TV模式";
-            this.buttonTVMode.UseVisualStyleBackColor = true;
-            this.buttonTVMode.Visible = false;
-            this.buttonTVMode.Click += new System.EventHandler(this.buttonTVMode_Click);
-            // 
             // buttonPinOutputSettings
             // 
-            this.buttonPinOutputSettings.Location = new System.Drawing.Point(121, 20);
+            this.buttonPinOutputSettings.Location = new System.Drawing.Point(11, 62);
             this.buttonPinOutputSettings.Name = "buttonPinOutputSettings";
-            this.buttonPinOutputSettings.Size = new System.Drawing.Size(70, 30);
+            this.buttonPinOutputSettings.Size = new System.Drawing.Size(175, 30);
             this.buttonPinOutputSettings.TabIndex = 12;
             this.buttonPinOutputSettings.Text = "输出设置";
             this.buttonPinOutputSettings.UseVisualStyleBackColor = true;
             this.buttonPinOutputSettings.Click += new System.EventHandler(this.buttonPinOutputSettings_Click);
-            // 
-            // buttonMixerOnOff
-            // 
-            this.buttonMixerOnOff.Enabled = false;
-            this.buttonMixerOnOff.Location = new System.Drawing.Point(122, 52);
-            this.buttonMixerOnOff.Name = "buttonMixerOnOff";
-            this.buttonMixerOnOff.Size = new System.Drawing.Size(69, 30);
-            this.buttonMixerOnOff.TabIndex = 15;
-            this.buttonMixerOnOff.Text = "隐藏字幕";
-            this.buttonMixerOnOff.UseVisualStyleBackColor = true;
-            this.buttonMixerOnOff.Visible = false;
-            this.buttonMixerOnOff.Click += new System.EventHandler(this.buttonMixerOnOff_Click);
-            // 
-            // buttonCrossbarSettings
-            // 
-            this.buttonCrossbarSettings.Location = new System.Drawing.Point(11, 84);
-            this.buttonCrossbarSettings.Name = "buttonCrossbarSettings";
-            this.buttonCrossbarSettings.Size = new System.Drawing.Size(180, 26);
-            this.buttonCrossbarSettings.TabIndex = 14;
-            this.buttonCrossbarSettings.Text = "Crossbar settings";
-            this.buttonCrossbarSettings.UseVisualStyleBackColor = true;
-            this.buttonCrossbarSettings.Visible = false;
-            this.buttonCrossbarSettings.Click += new System.EventHandler(this.buttonCrossbarSettings_Click);
             // 
             // groupBox1
             // 
