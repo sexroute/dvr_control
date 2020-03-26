@@ -48,11 +48,9 @@
         private StatusStrip statusStrip1;
         private TextBox textBoxZiMu;
         private ToolStripStatusLabel toolStripStatusLabel1;
-        private ToolStripMenuItem tVToolStripMenuItem;
         private ToolStripMenuItem 帮助HToolStripMenuItem;
         private ToolStripMenuItem 保存截图PToolStripMenuItem;
         private ToolStripMenuItem 菜单MToolStripMenuItem;
-        private ToolStripMenuItem 模式ToolStripMenuItem;
         private ToolStripMenuItem 输出截图ToolStripMenuItem;
         private ToolStripMenuItem 输出设置ToolStripMenuItem;
         private ToolStripMenuItem 输入截图IToolStripMenuItem;
@@ -455,8 +453,6 @@
             this.菜单MToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.属性AToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.输出设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.模式ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.输出截图ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.输入截图IToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.保存截图PToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -511,8 +507,6 @@
             this.菜单MToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.属性AToolStripMenuItem,
             this.输出设置ToolStripMenuItem,
-            this.tVToolStripMenuItem,
-            this.模式ToolStripMenuItem,
             this.输出截图ToolStripMenuItem,
             this.输入截图IToolStripMenuItem,
             this.保存截图PToolStripMenuItem});
@@ -533,20 +527,6 @@
             this.输出设置ToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.输出设置ToolStripMenuItem.Text = "输出设置(&S)";
             this.输出设置ToolStripMenuItem.Click += new System.EventHandler(this.buttonPinOutputSettings_Click);
-            // 
-            // tVToolStripMenuItem
-            // 
-            this.tVToolStripMenuItem.Name = "tVToolStripMenuItem";
-            this.tVToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
-            this.tVToolStripMenuItem.Text = "TV模式(&T)";
-            this.tVToolStripMenuItem.Click += new System.EventHandler(this.buttonTVMode_Click);
-            // 
-            // 模式ToolStripMenuItem
-            // 
-            this.模式ToolStripMenuItem.Name = "模式ToolStripMenuItem";
-            this.模式ToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
-            this.模式ToolStripMenuItem.Text = "显示字幕(&D)";
-            this.模式ToolStripMenuItem.Click += new System.EventHandler(this.buttonMixerOnOff_Click);
             // 
             // 输出截图ToolStripMenuItem
             // 
