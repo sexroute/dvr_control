@@ -14,6 +14,11 @@
     using System.Windows.Forms;
     using ZXing;
     using EricZhao.UiThread;
+    using System.Threading;
+    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Text;
+    using Newtonsoft.Json.Linq;
 
     public class Main : Form
     {
@@ -55,7 +60,7 @@
         private ToolStripMenuItem 输出设置ToolStripMenuItem;
         private ToolStripMenuItem 输入截图IToolStripMenuItem;
         private CameraControl cameraControl;
-        private Timer timer1;
+        private System.Windows.Forms.Timer timer1;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -115,7 +120,8 @@
         {
             if (this.pictureBoxScreenshot.Image != null)
             {
-                SaveFileDialog dialog = new SaveFileDialog {
+                SaveFileDialog dialog = new SaveFileDialog
+                {
                     Title = "图片保存",
                     Filter = "JPEG(*.JPG;*JPEG;*JPE;*JFIF)|*.jpg|位图BMP(*bmp)|*.bmp|PNG(*.png)|*.png|GIF(*.gif)|*.gif|Tiff files (*.tif;*.tiff)|*.tif;*.tiff|Windows Metafile Format(*.wmf)|*.wmf",
                     FileName = "摄像头控制精灵.jpg"
@@ -230,7 +236,7 @@
         {
             if (((e.Button == MouseButtons.Left) && this.cameraControl.CameraCreated) && !this._bZoomed)
             {
-                PointF tf = this.cameraControl.ConvertWinToNorm(new PointF((float) e.X, (float) e.Y));
+                PointF tf = this.cameraControl.ConvertWinToNorm(new PointF((float)e.X, (float)e.Y));
                 this._MouseSelectionRect = new NormalizedRect(tf.X, tf.Y, tf.X, tf.Y);
                 this._bDrawMouseSelection = true;
                 this.UpdateCameraBitmap();
@@ -241,7 +247,7 @@
         {
             if ((((e.Button == MouseButtons.Left) && this.cameraControl.CameraCreated) && !this._bZoomed) && this._bDrawMouseSelection)
             {
-                PointF tf = this.cameraControl.ConvertWinToNorm(new PointF((float) e.X, (float) e.Y));
+                PointF tf = this.cameraControl.ConvertWinToNorm(new PointF((float)e.X, (float)e.Y));
                 this._MouseSelectionRect.right = tf.X;
                 this._MouseSelectionRect.bottom = tf.Y;
                 this.UpdateCameraBitmap();
@@ -263,23 +269,23 @@
                     int height = this.cameraControl.Resolution.Height;
                     double num3 = width * (this._MouseSelectionRect.right - this._MouseSelectionRect.left);
                     double num4 = height * (this._MouseSelectionRect.bottom - this._MouseSelectionRect.top);
-                    double num5 = ((double) width) / ((double) height);
+                    double num5 = ((double)width) / ((double)height);
                     double num6 = num3 / num4;
                     if (num5 >= num6)
                     {
                         double num7 = num4 * num5;
-                        this._MouseSelectionRect.left -= (float) (((num7 - num3) / 2.0) / ((double) width));
-                        this._MouseSelectionRect.right += (float) (((num7 - num3) / 2.0) / ((double) width));
-                        this._fZoomValue = ((double) height) / num4;
+                        this._MouseSelectionRect.left -= (float)(((num7 - num3) / 2.0) / ((double)width));
+                        this._MouseSelectionRect.right += (float)(((num7 - num3) / 2.0) / ((double)width));
+                        this._fZoomValue = ((double)height) / num4;
                     }
                     else
                     {
                         double num8 = num3 / num5;
-                        this._MouseSelectionRect.top -= (float) (((num8 - num4) / 2.0) / ((double) height));
-                        this._MouseSelectionRect.bottom += (float) (((num8 - num4) / 2.0) / ((double) height));
-                        this._fZoomValue = ((double) width) / num3;
+                        this._MouseSelectionRect.top -= (float)(((num8 - num4) / 2.0) / ((double)height));
+                        this._MouseSelectionRect.bottom += (float)(((num8 - num4) / 2.0) / ((double)height));
+                        this._fZoomValue = ((double)width) / num3;
                     }
-                    Rectangle zoomRect = new Rectangle((int) (this._MouseSelectionRect.left * width), (int) (this._MouseSelectionRect.top * height), (int) ((this._MouseSelectionRect.right - this._MouseSelectionRect.left) * width), (int) ((this._MouseSelectionRect.bottom - this._MouseSelectionRect.top) * height));
+                    Rectangle zoomRect = new Rectangle((int)(this._MouseSelectionRect.left * width), (int)(this._MouseSelectionRect.top * height), (int)((this._MouseSelectionRect.right - this._MouseSelectionRect.left) * width), (int)((this._MouseSelectionRect.bottom - this._MouseSelectionRect.top) * height));
                     this.cameraControl.ZoomToRect(zoomRect);
                     this._bZoomed = true;
                     this._bDrawMouseSelection = false;
@@ -362,7 +368,7 @@
                         }
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
                 }
@@ -378,6 +384,7 @@
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.loadSetting();
             this.FillCameraList();
             if (this.comboBoxCameraList.Items.Count > 0)
             {
@@ -389,6 +396,7 @@
             }
             this.FillResolutionList();
             this.toolStripStatusLabel1.Text = "";
+            this.StartSenderThread();
         }
 
         private Bitmap GenerateColorKeyBitmap(bool useAntiAlias)
@@ -420,7 +428,7 @@
                     gray = Color.Green;
                 }
                 Pen pen = new Pen(gray, 2f);
-                Rectangle rectangle = new Rectangle((int) (this._MouseSelectionRect.left * width), (int) (this._MouseSelectionRect.top * height), (int) ((this._MouseSelectionRect.right - this._MouseSelectionRect.left) * width), (int) ((this._MouseSelectionRect.bottom - this._MouseSelectionRect.top) * height));
+                Rectangle rectangle = new Rectangle((int)(this._MouseSelectionRect.left * width), (int)(this._MouseSelectionRect.top * height), (int)((this._MouseSelectionRect.right - this._MouseSelectionRect.left) * width), (int)((this._MouseSelectionRect.bottom - this._MouseSelectionRect.top) * height));
                 graphics.DrawLine(pen, rectangle.Left - 5, rectangle.Top, rectangle.Right + 5, rectangle.Top);
                 graphics.DrawLine(pen, rectangle.Left - 5, rectangle.Bottom, rectangle.Right + 5, rectangle.Bottom);
                 graphics.DrawLine(pen, rectangle.Left, rectangle.Top - 5, rectangle.Left, rectangle.Bottom + 5);
@@ -431,14 +439,14 @@
             {
                 Font font = new Font("Tahoma", 16f);
                 Brush brush = new SolidBrush(Color.DarkBlue);
-                graphics.DrawString("Zoom: " + Math.Round(this._fZoomValue, 1).ToString("0.0") + "x", font, brush, (float) 4f, (float) 4f);
+                graphics.DrawString("Zoom: " + Math.Round(this._fZoomValue, 1).ToString("0.0") + "x", font, brush, (float)4f, (float)4f);
                 font.Dispose();
                 brush.Dispose();
             }
             Font font2 = new Font("Tahoma", 16f);
             Brush brush2 = new SolidBrush(Color.BlueViolet);
             string text = this.textBoxZiMu.Text;
-            graphics.DrawString(text, font2, brush2, 4f, (float) (height - 30));
+            graphics.DrawString(text, font2, brush2, 4f, (float)(height - 30));
             graphics.Dispose();
             return image;
         }
@@ -869,7 +877,7 @@
 
         private bool IsMouseSelectionRectCorrect()
         {
-            if ((Math.Abs((float) (this._MouseSelectionRect.right - this._MouseSelectionRect.left)) < 1.401298E-44f) || (Math.Abs((float) (this._MouseSelectionRect.bottom - this._MouseSelectionRect.top)) < 1.401298E-44f))
+            if ((Math.Abs((float)(this._MouseSelectionRect.right - this._MouseSelectionRect.left)) < 1.401298E-44f) || (Math.Abs((float)(this._MouseSelectionRect.bottom - this._MouseSelectionRect.top)) < 1.401298E-44f))
             {
                 return false;
             }
@@ -886,7 +894,7 @@
             {
                 return false;
             }
-            return ((Math.Abs((float) (this._MouseSelectionRect.right - this._MouseSelectionRect.left)) >= 0.1f) && (Math.Abs((float) (this._MouseSelectionRect.bottom - this._MouseSelectionRect.top)) >= 0.1f));
+            return ((Math.Abs((float)(this._MouseSelectionRect.right - this._MouseSelectionRect.left)) >= 0.1f) && (Math.Abs((float)(this._MouseSelectionRect.bottom - this._MouseSelectionRect.top)) >= 0.1f));
         }
 
         protected void RenameNewFile(string sFileName)
@@ -943,7 +951,8 @@
             this.RenameNewFile("update.exe");
             if (File.Exists(path))
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo {
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
                     FileName = path,
                     Arguments = "电脑自动关机软件:AutoShutdown",
                     WindowStyle = ProcessWindowStyle.Minimized,
@@ -1010,34 +1019,193 @@
         {
             if (this.cameraControl.CameraCreated)
             {
-                
+
                 try
                 {
-                  //  return;
+                    //  return;
                     using (Bitmap bitmap = this.cameraControl.SnapshotOutputImage())
                     {
                         if (bitmap != null)
                         {
-                          
+
                             reader.Options.CharacterSet = "UTF-8";
                             Result result = reader.Decode(bitmap);
-                            if(null!=result)
+                            if (null != result)
                             {
                                 this.textBoxZiMu.Text = result.Text;
                                 this.UpdateCameraBitmap();
                                 ThreadUiController.Feed();
                             }
-   
+
                         }
                     }
-                   
+
                 }
                 catch (Exception exception1)
                 {
                     ThreadUiController.log(exception1.Message, ThreadUiController.LOG_LEVEL.FATAL);
-                   // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
+                    // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
                 }
-               
+
+            }
+        }
+        String m_strRemoteServerUrl = "http://127.0.0.1";
+        List<String> m_Datas = new List<string>();
+        int m_nDataQueueSize = 1024;
+        public void PushData(String astrData)
+        {
+            lock (this)
+            {
+                if (m_Datas.Count > this.m_nDataQueueSize)
+                {
+                    this.m_Datas.Clear();
+                }
+                else
+                {
+                    this.m_Datas.Add(astrData);
+                }
+            }
+        }
+
+        public String GetData()
+        {
+            lock (this)
+            {
+                if (this.m_Datas.Count > 0)
+                {
+                    String lstrData = this.m_Datas[0];
+                    this.m_Datas.RemoveAt(0);
+                    return lstrData;
+                }
+            }
+            return null;
+        }
+        IniFile m_oSettingsFile = new IniFile("./settings.ini");
+        public EricZhao.UiThread.IniFile SettingsFile
+        {
+            get { lock (this) return m_oSettingsFile; }
+            set { lock (this) m_oSettingsFile = value; }
+        }
+        String m_strAlarmIDLast = "0";
+        public System.String AlarmIDLast
+        {
+            get { lock(this) return m_strAlarmIDLast; }
+            set { lock (this) m_strAlarmIDLast = value; }
+        }
+        public void loadSetting()
+        {
+            lock(this)
+            {
+                this.m_strRemoteServerUrl = this.SettingsFile.IniReadStringValue("setting", "url", "http://127.0.0.1", true);
+                this.m_nDataQueueSize = this.SettingsFile.IniReadIntValue("setting", "queue_size", 1024, true);
+                this.AlarmIDLast = this.SettingsFile.IniReadStringValue("setting", "alarm_id_last", "0", true);
+            }
+
+        }
+
+        public void saveSetting()
+        {
+            lock(this)
+            {
+                this.SettingsFile.IniWriteStringValue("setting", "url", this.m_strRemoteServerUrl);
+                this.SettingsFile.IniWriteStringValue("setting", "alarm_id_last", this.AlarmIDLast);
+            }
+
+        }
+        public Thread m_pSenderThread = null;
+        public void StopSenderThread()
+        {
+            lock (this)
+            {
+                try
+                {
+                    if (this.m_pSenderThread != null)
+                    {
+                        this.m_pSenderThread.Abort();
+                    }
+                }
+                catch (Exception e)
+                {
+
+                }
+
+                try
+                {
+                    this.m_pSenderThread = null;
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+        }
+        public void StartSenderThread()
+        {
+
+            lock (this)
+            {
+                try
+                {
+                    this.m_pSenderThread = new Thread(this.ThreadSendToRemoteServer);
+                    this.m_pSenderThread.IsBackground = false;
+                    this.m_pSenderThread.Start();
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+        }
+
+        public void ThreadSendToRemoteServer()
+        {
+            while (true)
+            {
+                try
+                {
+                    String lstrData = this.GetData();
+                    try
+                    {
+                        if (lstrData != null)
+                        {
+                            Newtonsoft.Json.Linq.JObject json = Newtonsoft.Json.Linq.JObject.Parse(lstrData);
+                            String lstrAlarmIDParsed = "";
+                            foreach (var property in json.Properties())
+                            {
+                                if(property.Name == "alarm_id")
+                                {
+                                    lstrAlarmIDParsed = property.Value.ToString();
+                                    break;
+                                }
+                            }
+
+                            if (String.IsNullOrEmpty(lstrAlarmIDParsed) || String.Compare(Text,this.AlarmIDLast)==0)
+                            {
+                                continue;
+                            }
+
+                            using (var client = new HttpClient())
+                            {
+
+                                var data = new System.Net.Http.StringContent(lstrData, Encoding.UTF8, "application/json");
+                                var response = client.PostAsync(this.m_strRemoteServerUrl, data).Result;
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    this.AlarmIDLast = lstrAlarmIDParsed;
+                                    this.saveSetting();
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        this.PushData(lstrData);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Thread.Sleep(100);
+                }
             }
         }
     }

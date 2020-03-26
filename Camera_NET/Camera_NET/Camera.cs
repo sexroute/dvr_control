@@ -10,6 +10,7 @@
     using System.Runtime.InteropServices.ComTypes;
     using System.Threading;
     using System.Windows.Forms;
+    using System.Collections.Generic;
 
     public class Camera : IDisposable
     {
@@ -1118,6 +1119,7 @@
             }
         }
 
+       
         public Camera_NET.VideoInput VideoInput
         {
             get
