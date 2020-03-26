@@ -1033,6 +1033,10 @@
                             if (null != result)
                             {
                                 this.textBoxZiMu.Text = result.Text;
+                                if(!String.IsNullOrEmpty(result.Text))
+                                {
+                                    this.PushData(result.Text);
+                                }
                                 this.UpdateCameraBitmap();
                                 ThreadUiController.Feed();
                             }
@@ -1050,17 +1054,27 @@
             }
         }
         String m_strRemoteServerUrl = "http://127.0.0.1";
+        public System.String RemoteServerUrl
+        {
+            get { lock (this) return m_strRemoteServerUrl; }
+            set { lock (this) m_strRemoteServerUrl = value; }
+        }
         List<String> m_Datas = new List<string>();
         int m_nDataQueueSize = 1024;
+        public int DataQueueSize
+        {
+            get { lock (this) return m_nDataQueueSize; }
+            set { if (value <= 0) { return; } lock (this) m_nDataQueueSize = value; }
+        }
         public void PushData(String astrData)
         {
             lock (this)
             {
-                if (m_Datas.Count > this.m_nDataQueueSize)
+                if (m_Datas.Count > this.DataQueueSize)
                 {
-                    this.m_Datas.Clear();
+                    this.m_Datas.RemoveAt(0);
                 }
-                else
+                
                 {
                     this.m_Datas.Add(astrData);
                 }
@@ -1096,8 +1110,8 @@
         {
             lock(this)
             {
-                this.m_strRemoteServerUrl = this.SettingsFile.IniReadStringValue("setting", "url", "http://127.0.0.1", true);
-                this.m_nDataQueueSize = this.SettingsFile.IniReadIntValue("setting", "queue_size", 1024, true);
+                this.RemoteServerUrl = this.SettingsFile.IniReadStringValue("setting", "url", "http://127.0.0.1", true);
+                this.DataQueueSize = this.SettingsFile.IniReadIntValue("setting", "queue_size", 1024, true);
                 this.AlarmIDLast = this.SettingsFile.IniReadStringValue("setting", "alarm_id_last", "0", true);
             }
 
@@ -1107,7 +1121,7 @@
         {
             lock(this)
             {
-                this.SettingsFile.IniWriteStringValue("setting", "url", this.m_strRemoteServerUrl);
+                this.SettingsFile.IniWriteStringValue("setting", "url", this.RemoteServerUrl);
                 this.SettingsFile.IniWriteStringValue("setting", "alarm_id_last", this.AlarmIDLast);
             }
 
@@ -1166,9 +1180,19 @@
                     String lstrData = this.GetData();
                     try
                     {
+                        Newtonsoft.Json.Linq.JObject json = null;
+                        try
+                        {
+                            json = Newtonsoft.Json.Linq.JObject.Parse(lstrData);
+                        }
+                        catch(Exception e)
+                        {
+                            ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                            continue;
+                        }
                         if (lstrData != null)
                         {
-                            Newtonsoft.Json.Linq.JObject json = Newtonsoft.Json.Linq.JObject.Parse(lstrData);
+                           
                             String lstrAlarmIDParsed = "";
                             foreach (var property in json.Properties())
                             {
@@ -1188,7 +1212,7 @@
                             {
 
                                 var data = new System.Net.Http.StringContent(lstrData, Encoding.UTF8, "application/json");
-                                var response = client.PostAsync(this.m_strRemoteServerUrl, data).Result;
+                                var response = client.PostAsync(this.RemoteServerUrl, data).Result;
                                 if (response.IsSuccessStatusCode)
                                 {
                                     this.AlarmIDLast = lstrAlarmIDParsed;
