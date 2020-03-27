@@ -381,6 +381,7 @@
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.SetupQRDecoder();
             this.loadSetting();
             this.FillCameraList();
             if (this.comboBoxCameraList.Items.Count > 0)
@@ -968,10 +969,21 @@
 
         }
         BarcodeReader reader = new BarcodeReader();
+
+        private void SetupQRDecoder()
+        {
+            reader.Options.CharacterSet = "UTF-8";
+            reader.TryInverted = false;
+            reader.Options.PossibleFormats = new List<ZXing.BarcodeFormat>();
+            reader.Options.PossibleFormats.Add(BarcodeFormat.QR_CODE);
+            reader.AutoRotate = false;
+        }
         
         private void timer1_Tick(object sender, EventArgs e)
         {
             Boolean lbEncodeSuccessfully = false;
+          
+           
             if (this.cameraControl.CameraCreated)
             {
 
@@ -982,20 +994,23 @@
                     {
                         if (bitmap != null)
                         {
-
-                            reader.Options.CharacterSet = "UTF-8";
-                            Result result = reader.Decode(bitmap);
-                            if (null != result)
+                            //using (Bitmap bitMapGray = ToGray(bitmap))
                             {
-                                this.textBoxZiMu.Text = result.Text;
-                                if(!String.IsNullOrEmpty(result.Text))
+                                
+                                Result result = reader.Decode(bitmap);
+                                if (null != result)
                                 {
-                                    this.PushData(result.Text);
+                                    this.textBoxZiMu.Text = result.Text;
+                                    if (!String.IsNullOrEmpty(result.Text))
+                                    {
+                                        this.PushData(result.Text);
+                                    }
+                                    this.UpdateCameraBitmap();
+                                    lbEncodeSuccessfully = true;
+                                    this.AutoSearch = 2;
                                 }
-                                this.UpdateCameraBitmap();
-                                lbEncodeSuccessfully = true;
-                                this.AutoSearch = 2;
                             }
+                           
 
                         }
                     }
@@ -1249,7 +1264,27 @@
             }
         }
 
-
+        /// <summary>
+        /// 图像灰度化
+        /// </summary>
+        /// <param name="bmp"></param>
+        /// <returns></returns>
+        public static Bitmap ToGray(Bitmap bmp)
+        {
+            for (int i = 0; i < bmp.Width; i++)
+            {
+                for (int j = 0; j < bmp.Height; j++)
+                {
+                    //获取该点的像素的RGB的颜色
+                    Color color = bmp.GetPixel(i, j);
+                    //利用公式计算灰度值
+                    int gray = (int)(color.R * 0.3 + color.G * 0.59 + color.B * 0.11);
+                    Color newColor = Color.FromArgb(gray, gray, gray);
+                    bmp.SetPixel(i, j, newColor);
+                }
+            }
+            return bmp;
+        }
 
         public void StartSenderThread()
         {
@@ -1407,7 +1442,7 @@
                             }
 
 
-                            if ( String.Compare(Text, this.AlarmIDLast) == 0)
+                            if ( String.Compare(lstrAlarmIDParsed, this.AlarmIDLast) == 0)
                             {
                                 lbSucceed = true;
                                 continue;
