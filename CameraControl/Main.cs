@@ -393,6 +393,7 @@
             this.FillResolutionList();
             this.toolStripStatusLabel1.Text = "";
             this.StartSenderThread();
+        //    this.StartAutoSearchThread();
         }
 
         private Bitmap GenerateColorKeyBitmap(bool useAntiAlias)
@@ -976,7 +977,7 @@
                 try
                 {
                     //  return;
-                    using (Bitmap bitmap = this.cameraControl.SnapshotOutputImage())
+                    using (Bitmap bitmap = this.cameraControl.SnapshotSourceImage())
                     {
                         if (bitmap != null)
                         {
@@ -992,6 +993,7 @@
                                 }
                                 this.UpdateCameraBitmap();
                                 lbEncodeSuccessfully = true;
+                                this.AutoSearch = 2;
                             }
 
                         }
@@ -1168,20 +1170,58 @@
                 }
             }
         }
-        Boolean m_bAutoSearch = false;
-        public System.Boolean AutoSearch
+
+        String m_strDeviceName = "";
+        public System.String DeviceName
+        {
+            get { lock (this) return m_strDeviceName; }
+            set { lock (this) m_strDeviceName = value; }
+        }
+        int m_bAutoSearch = 0;
+        public int AutoSearch
         {
             get { lock(this)return m_bAutoSearch; }
             set { lock (this) m_bAutoSearch = value; }
         }
+
+        int m_nXMin = -131;
+        int m_nXMax = 182;
+        int m_nYMin = -17;
+        int m_nYMax = 90;
+        int m_nSearchInterval = 20;
         public void ThreadAutoSearch()
         {
-            while(true)
+            int lnStartXIndex = m_nXMin;
+            int lnStartYIndex = m_nYMin;
+            while (true)
             {
                 try
                 {
-                    if(AutoSearch)
+                    if(AutoSearch>0)
                     {
+                        PTZDevice lpDevice = new PTZDevice(this.DeviceName, PTZType.Absolute);
+                        for(int x= lnStartXIndex; x<=m_nXMax;x=x+m_nSearchInterval)
+                        {
+                            if(x>m_nXMax)
+                            {
+                                x = m_nXMax;
+                            }
+
+                            for(int y= lnStartYIndex; y<=m_nYMax;y=y+m_nSearchInterval)
+                            {
+                                if(y>m_nYMax)
+                                {
+                                    y = m_nYMax;
+                                }
+                                lpDevice.Move(x, y);
+                                Thread.Sleep(2000);
+                                if(AutoSearch==2)
+                                {
+                                    AutoSearch = 0;
+                                    break;
+                                }
+                            }
+                        }
 
                     }
                 }catch(Exception e)
@@ -1230,6 +1270,7 @@
                         try
                         {
                             array = Newtonsoft.Json.Linq.JArray.Parse(lstrData);
+                            lbSucceed = true;
                         }
                         catch(Exception e)
                         {
@@ -1310,16 +1351,18 @@
 
         private void autoSearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            String lstrDeviceName = comboBoxCameraList.Items[0].ToString();
+            this.DeviceName = lstrDeviceName;
             this.autoSearchToolStripMenuItem.Checked = !this.autoSearchToolStripMenuItem.Checked;
-
-            if (this.autoSearchToolStripMenuItem.Checked)
+            Thread.Sleep(100);
+            if(this.autoSearchToolStripMenuItem.Checked)
             {
-                String lstrDeviceName = comboBoxCameraList.Items[0].ToString();
-                PTZDevice lpDevice = new PTZDevice(lstrDeviceName, PTZType.Absolute);
-                
-                lpDevice.Move(100, 100);
+                this.AutoSearch = 1;
             }
-
+            else
+            {
+                this.AutoSearch = 0;
+            }
         }
     }
 }
