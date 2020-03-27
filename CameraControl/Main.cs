@@ -1221,9 +1221,10 @@
                                     AutoSearch = 0;
                                     break;
                                 }
-                                lpDevice.MoveXRelative(m_nSearchInterval2);
-                                Thread.Sleep(1000);
-                                lpDevice.MoveYRealtive(m_nSearchInterval2);
+                                //                                 lpDevice.MoveXRelative(m_nSearchInterval2);
+                                //                                 Thread.Sleep(1000);
+                                //                                 lpDevice.MoveYRealtive(m_nSearchInterval2);
+                                lpDevice.Move(x, y);
                                 Thread.Sleep(2000);
                                 if(AutoSearch==2 || AutoSearch ==0)
                                 {
