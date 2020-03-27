@@ -55,6 +55,8 @@
         private ToolStripMenuItem 输入截图IToolStripMenuItem;
         private CameraControl cameraControl;
         private System.Windows.Forms.Timer timer1;
+        private ToolStripMenuItem testToolStripMenuItem;
+        private ToolStripMenuItem autoSearchToolStripMenuItem;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -476,6 +478,8 @@
             this.cameraControl = new Camera_NET.CameraControl();
             this.buttonUnZoom = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -491,7 +495,8 @@
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.菜单MToolStripMenuItem});
+            this.菜单MToolStripMenuItem,
+            this.testToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(935, 25);
@@ -774,6 +779,21 @@
             this.timer1.Enabled = true;
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // testToolStripMenuItem
+            // 
+            this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.autoSearchToolStripMenuItem});
+            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
+            this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.testToolStripMenuItem.Text = "Test";
+            // 
+            // autoSearchToolStripMenuItem
+            // 
+            this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
+            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoSearchToolStripMenuItem.Text = "Auto Search";
+            this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
             // 
             // Main
             // 
@@ -1183,6 +1203,18 @@
                     Thread.Sleep(100);
                 }
             }
+        }
+
+        private void autoSearchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.autoSearchToolStripMenuItem.Checked = !this.autoSearchToolStripMenuItem.Checked;
+
+            if (this.autoSearchToolStripMenuItem.Checked)
+            {
+                String lstrDeviceName = comboBoxCameraList.Items[0].ToString();
+                PTZDevice lpDevice = new PTZDevice(lstrDeviceName, PTZType.Absolute);
+            }
+
         }
     }
 }
