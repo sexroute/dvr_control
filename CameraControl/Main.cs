@@ -1330,7 +1330,7 @@
                         {
                             var content = sr.ReadToEnd();
                             Debug.WriteLine(content);
-                            if(!String.IsNullOrEmpty(content))
+                            if(String.IsNullOrEmpty(content))
                             {
                                 lbRet = true;
                             }
