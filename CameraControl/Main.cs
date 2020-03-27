@@ -19,6 +19,7 @@
     using System.Net.Http;
     using System.Text;
     using Newtonsoft.Json.Linq;
+    using System.Net;
 
     public class Main : Form
     {
@@ -1269,6 +1270,87 @@
             }
         }
 
+        public Boolean PostDataToRemoteServer2Async(String astrata,String astrUrl)
+        {
+            Boolean lbSucceed = false;
+            try
+            {
+                using (var client = new HttpClient())                {
+
+                    var data = new System.Net.Http.StringContent(astrata, Encoding.UTF8, "application/json");
+                    var response =   client.PostAsync(astrUrl, data).Result;
+                    if (response.IsSuccessStatusCode)
+                    {                       
+                        lbSucceed = true;
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+
+            }
+
+            return lbSucceed;
+        }
+
+        public Boolean PostDataToRemoteServer(String astrData,String astrUrl)
+        {
+            Boolean lbRet = false;
+            try
+            {
+                var http = (HttpWebRequest)WebRequest.Create(new Uri(this.RemoteServerUrl));
+                http.Accept = "application/json";
+                http.ContentType = "application/json";
+                http.Method = "POST";
+                UTF8Encoding encoding = new UTF8Encoding();
+                Byte[] bytes = encoding.GetBytes(astrData);
+
+                try
+                {
+                    using (Stream newStream = http.GetRequestStream())
+                    {
+                        newStream.Write(bytes, 0, bytes.Length);
+                        newStream.Close();
+                    }
+
+                }
+                catch (Exception e)
+                {
+
+                }
+
+                try
+                {
+                    HttpWebResponse response = (HttpWebResponse)http.GetResponse();
+
+                    if(response.StatusCode== HttpStatusCode.OK)
+                    {
+                        var stream = response.GetResponseStream();
+                        using (var sr = new StreamReader(stream))
+                        {
+                            var content = sr.ReadToEnd();
+                            Debug.WriteLine(content);
+                            if(!String.IsNullOrEmpty(content))
+                            {
+                                lbRet = true;
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+            catch (Exception e2)
+            {
+                Debug.WriteLine(e2.Message);
+            }
+
+            return lbRet;
+        }
+
         public void ThreadSendToRemoteServer()
         {
             while (true)
@@ -1309,7 +1391,7 @@
                                     string name = property.Name;
                                     string value = property.Value.ToString();
 
-                                    if (property.Name == "alarm_id")
+                                    if (property.Name == "alarmid")
                                     {
                                         lstrAlarmIDParsed = property.Value.ToString();
                                         break;
@@ -1331,18 +1413,14 @@
                                 continue;
                             }
 
-                            using (var client = new HttpClient())
-                            {
 
-                                var data = new System.Net.Http.StringContent(lstrData, Encoding.UTF8, "application/json");
-                                var response = client.PostAsync(this.RemoteServerUrl, data).Result;
-                                if (response.IsSuccessStatusCode)
-                                {
-                                    this.AlarmIDLast = lstrAlarmIDParsed;
-                                    this.saveSetting();
-                                    lbSucceed = true;
-                                }
+                            lbSucceed = PostDataToRemoteServer(lstrData, this.RemoteServerUrl);
+                            if(lbSucceed)
+                            {
+                                this.AlarmIDLast = lstrAlarmIDParsed;
+                                this.saveSetting();
                             }
+
                         }
                     }
                     catch (Exception e)
