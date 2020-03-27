@@ -48,7 +48,6 @@
         private StatusStrip statusStrip1;
         private TextBox textBoxZiMu;
         private ToolStripStatusLabel toolStripStatusLabel1;
-        private ToolStripMenuItem 帮助HToolStripMenuItem;
         private ToolStripMenuItem 保存截图PToolStripMenuItem;
         private ToolStripMenuItem 菜单MToolStripMenuItem;
         private ToolStripMenuItem 输出截图ToolStripMenuItem;
@@ -456,7 +455,6 @@
             this.输出截图ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.输入截图IToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.保存截图PToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.帮助HToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -493,8 +491,7 @@
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.菜单MToolStripMenuItem,
-            this.帮助HToolStripMenuItem});
+            this.菜单MToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(935, 25);
@@ -548,13 +545,6 @@
             this.保存截图PToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.保存截图PToolStripMenuItem.Text = "保存截图(&P)";
             this.保存截图PToolStripMenuItem.Click += new System.EventHandler(this.buttonSaveSnapshotFrame_Click);
-            // 
-            // 帮助HToolStripMenuItem
-            // 
-            this.帮助HToolStripMenuItem.Name = "帮助HToolStripMenuItem";
-            this.帮助HToolStripMenuItem.Size = new System.Drawing.Size(61, 21);
-            this.帮助HToolStripMenuItem.Text = "帮助(&H)";
-            this.帮助HToolStripMenuItem.Click += new System.EventHandler(this.帮助HToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -719,6 +709,7 @@
             this.comboBoxResolutionList.Name = "comboBoxResolutionList";
             this.comboBoxResolutionList.Size = new System.Drawing.Size(194, 20);
             this.comboBoxResolutionList.TabIndex = 9;
+            this.comboBoxResolutionList.TabStop = false;
             this.comboBoxResolutionList.SelectedIndexChanged += new System.EventHandler(this.comboBoxResolutionList_SelectedIndexChanged);
             // 
             // labelResolutionTitle
@@ -739,6 +730,7 @@
             this.comboBoxCameraList.Name = "comboBoxCameraList";
             this.comboBoxCameraList.Size = new System.Drawing.Size(194, 20);
             this.comboBoxCameraList.TabIndex = 6;
+            this.comboBoxCameraList.TabStop = false;
             this.comboBoxCameraList.SelectedIndexChanged += new System.EventHandler(this.comboBoxCameraList_SelectedIndexChanged);
             // 
             // labelCameraTitle
