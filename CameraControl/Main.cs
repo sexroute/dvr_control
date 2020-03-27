@@ -1023,7 +1023,7 @@
 
             }
         }
-        String m_strRemoteServerUrl = "http://127.0.0.1";
+        String m_strRemoteServerUrl = "http://192.168.122.97:8180/?";
         public System.String RemoteServerUrl
         {
             get { lock (this) return m_strRemoteServerUrl; }
@@ -1270,7 +1270,7 @@
             }
         }
 
-        public Boolean PostDataToRemoteServer2Async(String astrata,String astrUrl)
+        public Boolean PostDataToRemoteServer2(String astrata,String astrUrl)
         {
             Boolean lbSucceed = false;
             try
@@ -1414,7 +1414,7 @@
                             }
 
 
-                            lbSucceed = PostDataToRemoteServer(lstrData, this.RemoteServerUrl);
+                            lbSucceed = PostDataToRemoteServer2(lstrData, this.RemoteServerUrl);
                             if(lbSucceed)
                             {
                                 this.AlarmIDLast = lstrAlarmIDParsed;
