@@ -393,7 +393,7 @@
             this.FillResolutionList();
             this.toolStripStatusLabel1.Text = "";
             this.StartSenderThread();
-        //    this.StartAutoSearchThread();
+            this.StartAutoSearchThread();
         }
 
         private Bitmap GenerateColorKeyBitmap(bool useAntiAlias)
@@ -1154,7 +1154,7 @@
 
         public void StartAutoSearchThread()
         {
-            this.StopSenderThread();
+            this.StopAutoSearchThread();
 
             lock (this)
             {
@@ -1197,9 +1197,9 @@
             {
                 try
                 {
-                    if(AutoSearch>0)
+                    if(AutoSearch>0 && !String.IsNullOrEmpty(this.DeviceName))
                     {
-                        PTZDevice lpDevice = new PTZDevice(this.DeviceName, PTZType.Absolute);
+                        PTZDevice lpDevice = new PTZDevice(this.DeviceName, PTZType.Relative);
                         for(int x= lnStartXIndex; x<=m_nXMax;x=x+m_nSearchInterval)
                         {
                             if(x>m_nXMax)
@@ -1213,13 +1213,27 @@
                                 {
                                     y = m_nYMax;
                                 }
-                                lpDevice.Move(x, y);
-                                Thread.Sleep(2000);
-                                if(AutoSearch==2)
+
+                                if (AutoSearch == 2 || AutoSearch == 0)
                                 {
                                     AutoSearch = 0;
                                     break;
                                 }
+                              //  lpDevice.MoveX(-10);
+                             //   Thread.Sleep(2000);
+                                lpDevice.MoveY(20);
+                                Thread.Sleep(5000);
+                                if(AutoSearch==2 || AutoSearch ==0)
+                                {
+                                    AutoSearch = 0;
+                                    break;
+                                }
+                            }
+
+                            if (AutoSearch == 2 || AutoSearch == 0)
+                            {
+                                AutoSearch = 0;
+                                break;
                             }
                         }
 
