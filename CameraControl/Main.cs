@@ -1189,6 +1189,7 @@
         int m_nYMin = -17;
         int m_nYMax = 90;
         int m_nSearchInterval = 20;
+        int m_nSearchInterval2 = 100;
         public void ThreadAutoSearch()
         {
             int lnStartXIndex = m_nXMin;
@@ -1200,7 +1201,8 @@
                     if(AutoSearch>0 && !String.IsNullOrEmpty(this.DeviceName))
                     {
                         PTZDevice lpDevice = new PTZDevice(this.DeviceName, PTZType.Relative);
-                        for(int x= lnStartXIndex; x<=m_nXMax;x=x+m_nSearchInterval)
+                        lpDevice.Move(m_nXMin, m_nYMin);
+                        for (int x= lnStartXIndex; x<=m_nXMax;x=x+m_nSearchInterval)
                         {
                             if(x>m_nXMax)
                             {
@@ -1219,10 +1221,10 @@
                                     AutoSearch = 0;
                                     break;
                                 }
-                              //  lpDevice.MoveX(-10);
-                             //   Thread.Sleep(2000);
-                                lpDevice.MoveY(20);
-                                Thread.Sleep(5000);
+                                lpDevice.MoveXRelative(m_nSearchInterval2);
+                                Thread.Sleep(1000);
+                                lpDevice.MoveYRealtive(m_nSearchInterval2);
+                                Thread.Sleep(2000);
                                 if(AutoSearch==2 || AutoSearch ==0)
                                 {
                                     AutoSearch = 0;
