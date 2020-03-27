@@ -969,6 +969,7 @@
         
         private void timer1_Tick(object sender, EventArgs e)
         {
+            Boolean lbEncodeSuccessfully = false;
             if (this.cameraControl.CameraCreated)
             {
 
@@ -990,7 +991,7 @@
                                     this.PushData(result.Text);
                                 }
                                 this.UpdateCameraBitmap();
-                               
+                                lbEncodeSuccessfully = true;
                             }
 
                         }
@@ -1001,6 +1002,20 @@
                 {
                     ThreadUiController.log(exception1.Message, ThreadUiController.LOG_LEVEL.FATAL);
                     // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
+                }
+
+                if(!lbEncodeSuccessfully)
+                {
+                    try
+                    {
+                        this.textBoxZiMu.Text = "";
+                        this.UpdateCameraBitmap();
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+
                 }
 
             }
@@ -1105,8 +1120,82 @@
                 }
             }
         }
+
+        Thread m_pThreadAutoSearch = null;
+
+        public void StopAutoSearchThread()
+        {
+            lock (this)
+            {
+                try
+                {
+                    if (this.m_pThreadAutoSearch != null)
+                    {
+                        this.m_pThreadAutoSearch.Abort();
+                    }
+                }
+                catch (Exception e)
+                {
+
+                }
+
+                try
+                {
+                    this.m_pThreadAutoSearch = null;
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+        }
+
+        public void StartAutoSearchThread()
+        {
+            this.StopSenderThread();
+
+            lock (this)
+            {
+                try
+                {
+                    this.m_pThreadAutoSearch = new Thread(this.ThreadAutoSearch);
+                    this.m_pThreadAutoSearch.IsBackground = true;
+                    this.m_pThreadAutoSearch.Start();
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+        }
+        Boolean m_bAutoSearch = false;
+        public System.Boolean AutoSearch
+        {
+            get { lock(this)return m_bAutoSearch; }
+            set { lock (this) m_bAutoSearch = value; }
+        }
+        public void ThreadAutoSearch()
+        {
+            while(true)
+            {
+                try
+                {
+                    if(AutoSearch)
+                    {
+
+                    }
+                }catch(Exception e)
+                {
+                    ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                }
+            }
+        }
+
+
+
         public void StartSenderThread()
         {
+            this.StopSenderThread();
 
             lock (this)
             {
@@ -1137,10 +1226,10 @@
                         {
                             continue;
                         }
-                        Newtonsoft.Json.Linq.JObject json = null;
+                        Newtonsoft.Json.Linq.JArray array = null;
                         try
                         {
-                            json = Newtonsoft.Json.Linq.JObject.Parse(lstrData);
+                            array = Newtonsoft.Json.Linq.JArray.Parse(lstrData);
                         }
                         catch(Exception e)
                         {
@@ -1148,16 +1237,27 @@
                             ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
                             continue;
                         }
+
+
                         if (lstrData != null)
                         {
                            
                             String lstrAlarmIDParsed = "";
-                            foreach (var property in json.Properties())
+
+                            foreach (JObject obj in array.Children<JObject>())
                             {
-                                if(property.Name == "alarm_id")
+                                foreach (JProperty property in obj.Properties())
                                 {
-                                    lstrAlarmIDParsed = property.Value.ToString();
-                                    break;
+                                    string name = property.Name;
+                                    string value = property.Value.ToString();
+
+                                    if (property.Name == "alarm_id")
+                                    {
+                                        lstrAlarmIDParsed = property.Value.ToString();
+                                        break;
+                                    }
+                                    //Do something with name and value
+                                    //System.Windows.MessageBox.Show("name is "+name+" and value is "+value);
                                 }
                             }
 
@@ -1205,6 +1305,9 @@
             }
         }
 
+       
+
+
         private void autoSearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.autoSearchToolStripMenuItem.Checked = !this.autoSearchToolStripMenuItem.Checked;
@@ -1213,6 +1316,8 @@
             {
                 String lstrDeviceName = comboBoxCameraList.Items[0].ToString();
                 PTZDevice lpDevice = new PTZDevice(lstrDeviceName, PTZType.Absolute);
+                
+                lpDevice.Move(100, 100);
             }
 
         }
