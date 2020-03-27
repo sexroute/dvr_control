@@ -604,7 +604,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(41, 12);
             this.label1.TabIndex = 23;
-            this.label1.Text = "字幕：";
+            this.label1.Text = "识别：";
             // 
             // groupBox2
             // 
@@ -623,7 +623,7 @@
             this.buttonCameraSettings.Name = "buttonCameraSettings";
             this.buttonCameraSettings.Size = new System.Drawing.Size(175, 30);
             this.buttonCameraSettings.TabIndex = 11;
-            this.buttonCameraSettings.Text = "属性";
+            this.buttonCameraSettings.Text = "调整摄像头";
             this.buttonCameraSettings.UseVisualStyleBackColor = true;
             this.buttonCameraSettings.Click += new System.EventHandler(this.buttonCameraSettings_Click);
             // 
