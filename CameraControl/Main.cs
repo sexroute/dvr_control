@@ -1093,7 +1093,7 @@
                 try
                 {
                     this.m_pSenderThread = new Thread(this.ThreadSendToRemoteServer);
-                    this.m_pSenderThread.IsBackground = false;
+                    this.m_pSenderThread.IsBackground = true;
                     this.m_pSenderThread.Start();
                 }
                 catch (Exception e)
