@@ -460,6 +460,8 @@
             this.输出截图ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.输入截图IToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.保存截图PToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -481,8 +483,6 @@
             this.cameraControl = new Camera_NET.CameraControl();
             this.buttonUnZoom = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.autoSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -553,6 +553,22 @@
             this.保存截图PToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.保存截图PToolStripMenuItem.Text = "保存截图(&P)";
             this.保存截图PToolStripMenuItem.Click += new System.EventHandler(this.buttonSaveSnapshotFrame_Click);
+            // 
+            // testToolStripMenuItem
+            // 
+            this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.autoSearchToolStripMenuItem});
+            this.testToolStripMenuItem.Enabled = false;
+            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
+            this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.testToolStripMenuItem.Text = "Test";
+            // 
+            // autoSearchToolStripMenuItem
+            // 
+            this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
+            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoSearchToolStripMenuItem.Text = "Auto Search";
+            this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -783,21 +799,6 @@
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // testToolStripMenuItem
-            // 
-            this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autoSearchToolStripMenuItem});
-            this.testToolStripMenuItem.Name = "testToolStripMenuItem";
-            this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
-            this.testToolStripMenuItem.Text = "Test";
-            // 
-            // autoSearchToolStripMenuItem
-            // 
-            this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
-            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.autoSearchToolStripMenuItem.Text = "Auto Search";
-            this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
-            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1003,6 +1004,10 @@
                                     this.textBoxZiMu.Text = result.Text;
                                     if (!String.IsNullOrEmpty(result.Text))
                                     {
+                                        if(result.Text.ToUpper().CompareTo("OK".ToUpper())==0)
+                                        {
+                                            ThreadUiController.Feed();
+                                        }
                                         this.PushData(result.Text);
                                     }
                                     this.UpdateCameraBitmap();
