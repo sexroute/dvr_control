@@ -58,6 +58,7 @@
         private System.Windows.Forms.Timer timer1;
         private ToolStripMenuItem testToolStripMenuItem;
         private ToolStripMenuItem autoSearchToolStripMenuItem;
+        private System.Windows.Forms.Timer timer2;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -375,8 +376,7 @@
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            this.cameraControl.CloseCamera();
-            this.StartUpdate();
+            this.cameraControl.CloseCamera();          
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -483,6 +483,7 @@
             this.cameraControl = new Camera_NET.CameraControl();
             this.buttonUnZoom = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -566,7 +567,7 @@
             // autoSearchToolStripMenuItem
             // 
             this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
-            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.autoSearchToolStripMenuItem.Text = "Auto Search";
             this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
             // 
@@ -799,6 +800,12 @@
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // timer2
+            // 
+            this.timer2.Enabled = true;
+            this.timer2.Interval = 1000;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -899,29 +906,7 @@
             }
         }
 
-        protected void StartUpdate()
-        {
-            string startupPath = Application.StartupPath;
-            string path = startupPath + @"\\update.exe";
-            this.RenameNewFile("update.exe");
-            if (File.Exists(path))
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = path,
-                    Arguments = "电脑自动关机软件:AutoShutdown",
-                    WindowStyle = ProcessWindowStyle.Minimized,
-                    WorkingDirectory = startupPath
-                };
-                try
-                {
-                    Process.Start(startInfo);
-                }
-                catch (Win32Exception)
-                {
-                }
-            }
-        }
+
 
         private void UnzoomCamera()
         {
@@ -979,6 +964,26 @@
             reader.Options.PossibleFormats.Add(BarcodeFormat.QR_CODE);
             reader.AutoRotate = false;
         }
+
+
+        DateTime m_nTimeLastSucceed = DateTime.Now;
+        int m_nTimeSecondsThreshold = 100; //seconds
+        public int TimeSecondsThreshold
+        {
+            get { lock (this) return m_nTimeSecondsThreshold; }
+            set { lock (this) m_nTimeSecondsThreshold = value; }
+        }
+        public System.DateTime TimeLastSucceed
+        {
+            get { lock(this)return m_nTimeLastSucceed; }
+            set { lock (this) m_nTimeLastSucceed = value; }
+        }
+
+        private void MarkScanSucceed()
+        {
+            this.TimeLastSucceed = DateTime.Now;
+            ThreadUiController.Feed();
+        }
         
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -1006,7 +1011,7 @@
                                     {
                                         if(result.Text.ToUpper().CompareTo("OK".ToUpper())==0)
                                         {
-                                            ThreadUiController.Feed();
+                                            this.MarkScanSucceed();
                                         }
                                         this.PushData(result.Text);
                                     }
@@ -1096,6 +1101,20 @@
             get { lock(this) return m_strAlarmIDLast; }
             set { lock (this) m_strAlarmIDLast = value; }
         }
+
+        String m_strMaintainacePhone = "18612240190";
+        public System.String MaintainacePhone
+        {
+            get { lock(this)return m_strMaintainacePhone; }
+            set { lock(this)m_strMaintainacePhone = value; }
+        }
+
+        String m_strSMSUrl = "";
+        public System.String SMSUrl
+        {
+            get { lock (this) return m_strSMSUrl; }
+            set { lock (this) m_strSMSUrl = value; }
+        }
         public void loadSetting()
         {
             lock(this)
@@ -1103,6 +1122,9 @@
                 this.RemoteServerUrl = this.SettingsFile.IniReadStringValue("setting", "url", "http://127.0.0.1", true);
                 this.DataQueueSize = this.SettingsFile.IniReadIntValue("setting", "queue_size", 1024, true);
                 this.AlarmIDLast = this.SettingsFile.IniReadStringValue("setting", "alarm_id_last", "0", true);
+                this.TimeSecondsThreshold = this.SettingsFile.IniReadIntValue("setting", "succeed_time_sencond_threshold", 100, true);
+                this.MaintainacePhone = this.SettingsFile.IniReadStringValue("setting", "maintanace_phone", this.MaintainacePhone, true);
+                this.SMSUrl = this.SettingsFile.IniReadStringValue("setting", "maintanace_sms_url", this.SMSUrl, true);
             }
 
         }
@@ -1294,7 +1316,7 @@
         public void StartSenderThread()
         {
             this.StopSenderThread();
-
+            this.TimeLastSucceed = DateTime.Now;
             lock (this)
             {
                 try
@@ -1470,7 +1492,7 @@
                     {
                         if(lbSucceed)
                         {
-                            ThreadUiController.Feed();
+                            this.MarkScanSucceed();
                         }
                     }
                 }
@@ -1497,6 +1519,31 @@
             else
             {
                 this.AutoSearch = 0;
+            }
+        }
+
+
+        private void NotifyMaintanaceStaff()
+        {
+            if (!String.IsNullOrWhiteSpace(this.SMSUrl) 
+                && !(String.IsNullOrWhiteSpace(this.MaintainacePhone)))
+            {
+
+            }
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+           TimeSpan lpOffset = DateTime.Now - this.TimeLastSucceed;
+            if(lpOffset.TotalSeconds>this.TimeSecondsThreshold)
+            {
+                try
+                {
+                    this.NotifyMaintanaceStaff();
+                }catch(Exception ex)
+                {
+                    ThreadUiController.log(ex.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                }
             }
         }
     }
