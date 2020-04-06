@@ -20,6 +20,11 @@
     using System.Text;
     using Newtonsoft.Json.Linq;
     using System.Net;
+    using Aliyun.Acs.Core.Profile;
+    using Aliyun.Acs.Core;
+    using Aliyun.Acs.Core.Http;
+    using Aliyun.Acs.Core.Exceptions;
+    using Aliyun.Acs.Dysmsapi.Model.V20170525;
 
     public class Main : Form
     {
@@ -384,6 +389,7 @@
             this.SetupQRDecoder();
             this.loadSetting();
             this.FillCameraList();
+            this.initSMS();
             if (this.comboBoxCameraList.Items.Count > 0)
             {
                 this.comboBoxCameraList.SelectedIndex = 0;
@@ -1102,7 +1108,7 @@
             set { lock (this) m_strAlarmIDLast = value; }
         }
 
-        String m_strMaintainacePhone = "18612240190";
+        String m_strMaintainacePhone = "18600677886";
         public System.String MaintainacePhone
         {
             get { lock(this)return m_strMaintainacePhone; }
@@ -1412,7 +1418,25 @@
 
             return lbRet;
         }
+        void initSMS()
+        {
+            try
+            {
+                //产品名称:云通信短信API产品,开发者无需替换
+                const String product = "Dysmsapi";
+                //产品域名,开发者无需替换
+                const String domain = "dysmsapi.aliyuncs.com";
 
+                DefaultProfile.AddEndpoint("cn-hangzhou",
+                    "cn-hangzhou",
+                    product,
+                    domain);
+            }
+            catch(Exception ex)
+            {
+                ThreadUiController.log(ex.Message, ThreadUiController.LOG_LEVEL.FATAL);
+            }
+        }
         public void ThreadSendToRemoteServer()
         {
             while (true)
@@ -1523,13 +1547,75 @@
         }
 
 
-        private void NotifyMaintanaceStaff()
-        {
-            if (!String.IsNullOrWhiteSpace(this.SMSUrl) 
-                && !(String.IsNullOrWhiteSpace(this.MaintainacePhone)))
-            {
+        const String accessKeyId = "LTAIZofTLpflOxi3";
+        const String accessKeySecret = "Mrrr2lCy2HUXFcR9nBr6fTBhlWBLlb";
 
+        private Boolean  NotifyMaintanaceStaff()
+        {
+            try
+            {
+               
+                if ( !(String.IsNullOrWhiteSpace(this.MaintainacePhone)))
+                {
+
+                    IClientProfile profile = DefaultProfile.GetProfile("cn-hangzhou", 
+                        accessKeyId, 
+                        accessKeySecret);
+
+
+                    IAcsClient acsClient = new DefaultAcsClient(profile);
+                    SendSmsRequest request = new SendSmsRequest();
+                    SendSmsResponse response = null;
+
+                    //必填:待发送手机号。支持以逗号分隔的形式进行批量调用，批量上限为1000个手机号码,批量调用相对于单条调用及时性稍有延迟,验证码类型的短信推荐使用单条调用的方式
+                    request.PhoneNumbers = this.MaintainacePhone;
+                    //必填:短信签名-可在短信控制台中找到
+                    request.SignName = "博华科技";
+                    //必填:短信模板-可在短信控制台中找到
+                    request.TemplateCode = "SMS_150570828";
+                    //可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时,此处的值为
+
+                    String lstrTemp = String.Format("\"company\":\"{0}\"," +
+                        "\"factory\":\"{1}\",\"set\":\"{2}\"," +
+                        "\"plant\":\"{3}\",\"time\":\"{4}\"," +
+                        "\"detail\":\"{5}\",\"channel\":\"{6}\"," +
+                        "\"value\":\"{7}\"",
+                                                     "博华科技", 
+                                                     "", 
+                                                     "", 
+                                                     "二维码识别", 
+                                                     DateTime.Now.ToString(), 
+                                                     1, 
+                                                     "二维码超过时间没有结果", 
+                                                     this.TimeSecondsThreshold+"秒");
+                    String lstrTemp1 = "{" + lstrTemp + "}";
+                    request.TemplateParam = lstrTemp1;//"{\"plant\":\" 大连石化-三催化-P1001A\",\"time\":\"2018年2月9日14:35:25\",\"detail\":\"数据中断\",\"channel\":\"1H\"}";
+                                                      //可选:outId为提供给业务方扩展字段,最终在短信回执消息中将此值带回给调用者
+                                                      //request.OutId = "yourOutId";
+                                                      //请求失败这里会抛ClientException异常
+                    response = acsClient.GetAcsResponse(request);
+
+                    if (response.Code.Contains("OK"))
+                    {
+                        String lstrLog = String.Format("发送短信成功:{0}", lstrTemp);
+                        ThreadUiController.
+                            log(lstrLog,ThreadUiController.LOG_LEVEL.INFO);
+                        return true;
+                    }
+                    else
+                    {
+                        String lstrLog = String.Format("发送短信失败:{0},{1}", response.Code, lstrTemp);
+                        ThreadUiController.log(lstrLog, ThreadUiController.LOG_LEVEL.INFO);
+                    }                  
+                }
             }
+            catch(Exception ex)
+            {
+                ThreadUiController.log(ex.Message, ThreadUiController.LOG_LEVEL.FATAL);
+            }
+
+            return false;
+
         }
 
         private void timer2_Tick(object sender, EventArgs e)
@@ -1539,7 +1625,10 @@
             {
                 try
                 {
-                    this.NotifyMaintanaceStaff();
+                    if(this.NotifyMaintanaceStaff())
+                    {
+                        this.TimeLastSucceed = DateTime.Now;
+                    }
                 }catch(Exception ex)
                 {
                     ThreadUiController.log(ex.Message, ThreadUiController.LOG_LEVEL.FATAL);
