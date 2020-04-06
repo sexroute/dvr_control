@@ -1115,11 +1115,11 @@
             set { lock(this)m_strMaintainacePhone = value; }
         }
 
-        String m_strSMSUrl = "";
-        public System.String SMSUrl
+        String m_strSMSTag = "";
+        public System.String SMSTag
         {
-            get { lock (this) return m_strSMSUrl; }
-            set { lock (this) m_strSMSUrl = value; }
+            get { lock (this) return m_strSMSTag; }
+            set { lock (this) m_strSMSTag = value; }
         }
         public void loadSetting()
         {
@@ -1130,7 +1130,7 @@
                 this.AlarmIDLast = this.SettingsFile.IniReadStringValue("setting", "alarm_id_last", "0", true);
                 this.TimeSecondsThreshold = this.SettingsFile.IniReadIntValue("setting", "succeed_time_sencond_threshold", 100, true);
                 this.MaintainacePhone = this.SettingsFile.IniReadStringValue("setting", "maintanace_phone", this.MaintainacePhone, true);
-                this.SMSUrl = this.SettingsFile.IniReadStringValue("setting", "maintanace_sms_url", this.SMSUrl, true);
+                this.SMSTag = this.SettingsFile.IniReadStringValue("setting", "maintanace_sms_tag", this.SMSTag, true);
             }
 
         }
@@ -1581,7 +1581,7 @@
                         "\"detail\":\"{5}\",\"channel\":\"{6}\"," +
                         "\"value\":\"{7}\"",
                                                      "博华科技", 
-                                                     "", 
+                                                     this.SMSTag, 
                                                      "", 
                                                      "二维码识别", 
                                                      DateTime.Now.ToString(), 
