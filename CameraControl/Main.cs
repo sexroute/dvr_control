@@ -25,6 +25,7 @@
     using Aliyun.Acs.Core.Http;
     using Aliyun.Acs.Core.Exceptions;
     using Aliyun.Acs.Dysmsapi.Model.V20170525;
+    using Newtonsoft.Json;
 
     public class Main : Form
     {
@@ -1061,7 +1062,12 @@
             set { lock (this) m_strRemoteServerUrl = value; }
         }
         List<String> m_Datas = new List<string>();
-        int m_nDataQueueSize = 1024;
+        public System.Collections.Generic.List<System.String> Datas
+        {
+            get { lock(this) return m_Datas; }
+            set { lock (this) m_Datas = value; }
+        }
+        int m_nDataQueueSize = 1024*100;
         public int DataQueueSize
         {
             get { lock (this) return m_nDataQueueSize; }
@@ -1071,28 +1077,76 @@
         {
             lock (this)
             {
-                if (m_Datas.Count > this.DataQueueSize)
+                if (Datas.Count > this.DataQueueSize)
                 {
-                    this.m_Datas.RemoveAt(0);
+                    this.Datas.RemoveAt(0);
                 }
                 
                 {
-                    this.m_Datas.Add(astrData);
+                    this.Datas.Add(astrData);
+                }
+
+                this.saveDataToLocalStorage();
+            }
+        }
+
+        public void loadDataFromLocalStorage()
+        {
+            lock (this)
+            {
+                try
+                {
+                    string json = File.ReadAllText(AlarmDataFileName);
+                    List<String> lpData =  (List<string>)JsonConvert.DeserializeObject(json);
+                    if(lpData!=null)
+                    {
+                        this.Datas = lpData;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    ThreadUiController.Fatal(ex.Message);
                 }
             }
+        }
+
+        String m_strAlarmDataFileName = "./alarm_data.json";
+        public System.String AlarmDataFileName
+        {
+            get { return m_strAlarmDataFileName; }
+            set { m_strAlarmDataFileName = value; }
+        }
+        public void saveDataToLocalStorage()
+        {
+            lock(this)
+            {
+                try
+                {
+                    string json = JsonConvert.SerializeObject(this.Datas.ToArray());
+                    File.WriteAllText(AlarmDataFileName, JsonConvert.SerializeObject(json));
+                }
+                catch (Exception ex)
+                {
+                    ThreadUiController.log(ex.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                }
+            }
+
         }
 
         public String GetData()
         {
             lock (this)
             {
-                if (this.m_Datas.Count > 0)
+                if (this.Datas.Count > 0)
                 {
-                    String lstrData = this.m_Datas[0];
-                    this.m_Datas.RemoveAt(0);
+                    String lstrData = this.Datas[0];
+                    this.Datas.RemoveAt(0);
                     return lstrData;
                 }
             }
+
+            this.saveDataToLocalStorage();
             return null;
         }
         IniFile m_oSettingsFile = new IniFile("./settings.ini");
@@ -1132,6 +1186,8 @@
                 this.MaintainacePhone = this.SettingsFile.IniReadStringValue("setting", "maintanace_phone", this.MaintainacePhone, true);
                 this.SMSTag = this.SettingsFile.IniReadStringValue("setting", "maintanace_sms_tag", this.SMSTag, true);
             }
+
+            this.loadDataFromLocalStorage();
 
         }
 
@@ -1442,6 +1498,7 @@
             while (true)
             {
                 Boolean lbSucceed = false;
+                Boolean lbShouldPushBack = false;
                 try
                 {
                     String lstrData = this.GetData();
@@ -1500,6 +1557,8 @@
                             }
 
 
+                            lbShouldPushBack = true;
+
                             lbSucceed = PostDataToRemoteServer2(lstrData, this.RemoteServerUrl);
                             if(lbSucceed)
                             {
@@ -1511,7 +1570,11 @@
                     }
                     catch (Exception e)
                     {
-                        this.PushData(lstrData);
+                        if(lbShouldPushBack)
+                        {
+                            this.PushData(lstrData);
+                        }
+                        
                     }finally
                     {
                         if(lbSucceed)

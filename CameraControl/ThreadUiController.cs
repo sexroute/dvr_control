@@ -304,7 +304,25 @@ namespace EricZhao.UiThread
             }
             return (info.Length >= m_nLogFileSizeLimit);
         }
+        public static void Fatal(string astrlog)
+        {
+             log(astrlog, LOG_LEVEL.FATAL, true);
+        }
 
+        public static void Debug(string astrlog)
+        {
+            log(astrlog, LOG_LEVEL.DEBUG, true);
+        }
+
+        public static void Error(string astrlog)
+        {
+            log(astrlog, LOG_LEVEL.ERROR, true);
+        }
+
+        public static void Info(string astrlog)
+        {
+            log(astrlog, LOG_LEVEL.INFO, true);
+        }
         public static void log(string astrlog, LOG_LEVEL aenumLogLevel = LOG_LEVEL.INFO, Boolean abPrintStack = true)
         {
             try
