@@ -75,6 +75,7 @@
         private ToolStripMenuItem 测试摄像头二维码ToolStripMenuItem;
         private ToolStripMenuItem 自动识别ToolStripMenuItem;
         private ToolStripMenuItem 短信测试ToolStripMenuItem;
+        private PictureBox pictureBox1;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -102,6 +103,12 @@
             {
                 this.cameraControl.DisplayPropertyPage_Crossbar(base.Handle);
             }
+        }
+
+
+        public void UpdateCameraBitmap()
+        {
+            this.UpdateCameraBitmap(false);
         }
 
         private void buttonMixerOnOff_Click(object sender, EventArgs e)
@@ -415,13 +422,24 @@
             this.StartAutoSearchThread();
         }
 
-        private Bitmap GenerateColorKeyBitmap(bool useAntiAlias)
+        private Bitmap GenerateColorKeyBitmap(bool useAntiAlias,bool abForceBitmap)
         {
             int width = this.cameraControl.OutputVideoSize.Width;
             int height = this.cameraControl.OutputVideoSize.Height;
+            int lnTextHeight = 70;
             if ((width <= 0) || (height <= 0))
             {
-                return null;
+                if(!abForceBitmap)
+                {
+                    return null;
+                }
+                 width = this.cameraControl.Width;
+                 height = this.cameraControl.Height;
+                if ((width <= 0) || (height <= 0))
+                {
+                    return null;
+                }
+                lnTextHeight = 120;
             }
             Bitmap image = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             Graphics graphics = Graphics.FromImage(image);
@@ -455,14 +473,16 @@
             {
                 Font font = new Font("Tahoma", 16f);
                 Brush brush = new SolidBrush(Color.DarkBlue);
+               
                 graphics.DrawString("Zoom: " + Math.Round(this._fZoomValue, 1).ToString("0.0") + "x", font, brush, (float)4f, (float)4f);
                 font.Dispose();
                 brush.Dispose();
             }
-            Font font2 = new Font("Tahoma", 16f);
+            Font font2 = new Font("Tahoma", 9f);
             Brush brush2 = new SolidBrush(Color.BlueViolet);
             string text = this.textBoxZiMu.Text;
-            graphics.DrawString(text, font2, brush2, 4f, (float)(height - 30));
+            RectangleF rectF1 = new RectangleF(4f, (float)(height - lnTextHeight), width-4f, (float)(lnTextHeight-10));
+            graphics.DrawString(text, font2, brush2, rectF1);
             graphics.Dispose();
             return image;
         }
@@ -505,6 +525,7 @@
             this.timerDetect = new System.Windows.Forms.Timer(this.components);
             this.timerMaintance = new System.Windows.Forms.Timer(this.components);
             this.短信测试ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -514,6 +535,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreenshot)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -657,6 +679,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Info;
+            this.splitContainer1.Panel2.Controls.Add(this.pictureBox1);
             this.splitContainer1.Panel2.Controls.Add(this.cameraControl);
             this.splitContainer1.Size = new System.Drawing.Size(935, 531);
             this.splitContainer1.SplitterDistance = 230;
@@ -861,6 +884,14 @@
             this.短信测试ToolStripMenuItem.Text = "短信测试";
             this.短信测试ToolStripMenuItem.Click += new System.EventHandler(this.短信测试ToolStripMenuItem_Click);
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(336, 328);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(308, 181);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -887,6 +918,7 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxScreenshot)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -968,16 +1000,23 @@
             this.cameraControl.ZoomToRect(new Rectangle(0, 0, this.cameraControl.Resolution.Width, this.cameraControl.Resolution.Height));
             this._bZoomed = false;
             this._fZoomValue = 1.0;
-            this.UpdateCameraBitmap();
+            this.UpdateCameraBitmap(false);
             this.UpdateUnzoomButton();
             this._bDrawMouseSelection = false;
         }
 
-        private void UpdateCameraBitmap()
+        private void UpdateCameraBitmap(bool updateifCameraError)
         {
-            if (this.cameraControl.MixerEnabled)
+            Bitmap lpBitMap = this.GenerateColorKeyBitmap(false, false);
+            if(updateifCameraError && lpBitMap == null)
             {
-                this.cameraControl.OverlayBitmap = this.GenerateColorKeyBitmap(false);
+                lpBitMap = this.GenerateColorKeyBitmap(false, true);
+                this.pictureBox1.Dock = DockStyle.Fill;
+                this.pictureBox1.Image = lpBitMap;
+            }
+            else if (this.cameraControl.MixerEnabled)
+            {
+                this.cameraControl.OverlayBitmap = lpBitMap;
             }
         }
 
@@ -1145,7 +1184,7 @@
                     try
                     {
                         this.textBoxZiMu.Text = "";
-                        this.UpdateCameraBitmap();
+                        this.UpdateCameraBitmap(false);
                     }
                     catch (Exception ex)
                     {
@@ -1189,7 +1228,7 @@
                                         }
                                         this.PushData(result.Text);
                                     }
-                                    this.UpdateCameraBitmap();
+                                    this.UpdateCameraBitmap(false);
                                     lbEncodeSuccessfully = true;
                                     this.AutoSearch = 2;
                                 }
@@ -1216,7 +1255,7 @@
                     try
                     {
                         this.textBoxZiMu.Text = "";
-                        this.UpdateCameraBitmap();
+                        this.UpdateCameraBitmap(false);
                     }
                     catch (Exception ex)
                     {
@@ -1892,6 +1931,7 @@
             {
                 this.textBoxZiMu.Text = lstrRest;
             }
+            this.UpdateCameraBitmap(true);
         }
 
         private void 测试摄像头二维码ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1906,6 +1946,7 @@
             {
                 this.textBoxZiMu.Text = lstrResult;
             }
+            this.UpdateCameraBitmap(false);
         }
 
         private void 自动识别ToolStripMenuItem_Click(object sender, EventArgs e)
