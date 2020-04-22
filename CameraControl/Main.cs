@@ -1011,12 +1011,18 @@
             if(updateifCameraError && lpBitMap == null)
             {
                 lpBitMap = this.GenerateColorKeyBitmap(false, true);
+                this.pictureBox1.Visible = true;
                 this.pictureBox1.Dock = DockStyle.Fill;
                 this.pictureBox1.Image = lpBitMap;
+
             }
             else if (this.cameraControl.MixerEnabled)
             {
                 this.cameraControl.OverlayBitmap = lpBitMap;
+                this.pictureBox1.Visible = false;
+            }else
+            {
+                this.pictureBox1.Visible = false;
             }
         }
 
@@ -1081,9 +1087,9 @@
 
 
 
-        public String DetectByTencent(Bitmap apBitMap)
+        public Boolean DetectByTencent(Bitmap apBitMap, ref String astrRet)
         {
-            String lstrResult = "";
+            Boolean lbRet = false ;
             try
             {
                 using(Bitmap lpBitMap = (Bitmap)apBitMap.Clone())
@@ -1112,8 +1118,13 @@
                     QrcodeOCRResponse resp = client.QrcodeOCRSync(req);
                     String lstrJson = AbstractModel.ToJsonString(resp);
                     JObject json = JObject.Parse(lstrJson);
-                    lstrResult = (string)json["CodeResults"][0]["Url"];
-                    Console.WriteLine(lstrResult);
+                    astrRet = (string)json["CodeResults"][0]["Url"];
+                    Console.WriteLine(astrRet);
+                    if(!String.IsNullOrWhiteSpace(astrRet))
+                    {
+                        lbRet = true;
+                    }
+                   
                 }
                 
             }
@@ -1122,21 +1133,21 @@
                 ThreadUiController.Fatal(e);
             }
 
-            return lstrResult;
+            return lbRet;
         }
 
-        private String DetectByRemoteServer(Bitmap apBitMap)
+        private Boolean DetectByRemoteServer(Bitmap apBitMap,ref String astrRet)
         {
-            String lstrResult = "";
+            Boolean lbRet = false;
             try
             {
-                lstrResult = DetectByTencent(apBitMap);
+                lbRet =  DetectByTencent(apBitMap,ref astrRet);
             }catch(Exception e)
             {
                 ThreadUiController.Fatal(e);
             }
 
-            return lstrResult;
+            return lbRet;
         }
 
 
@@ -1156,16 +1167,19 @@
                         {
                             //using (Bitmap bitMapGray = ToGray(bitmap))
                             {
-
-                                String lstrRet = DetectByRemoteServer(bitmap);
-                                if (lstrRet.ToUpper().CompareTo("OK".ToUpper()) == 0)
+                                String lstrRet = "";
+                                lbEncodeSuccessfully = DetectByRemoteServer(bitmap,ref lstrRet);
+                                if(lbEncodeSuccessfully)
                                 {
-                                    this.MarkScanSucceed();
+                                    if (lstrRet.ToUpper().CompareTo("OK".ToUpper()) == 0)
+                                    {
+                                        this.MarkScanSucceed();
+                                    }
+                                    this.PushData(lstrRet);
+                                    this.AutoSearch = 2;
+                                    astrResult = lstrRet;
                                 }
-                                this.PushData(lstrRet);
-                                lbEncodeSuccessfully = true;
-                                this.AutoSearch = 2;
-                                astrResult = lstrRet;
+
                             }
 
 
@@ -1902,13 +1916,16 @@
                 {
                     String lstrResult = "";
                     Boolean lbRest = this.DetectPatch(true,out lstrResult);
-                    if(lbRest)
+                    ThreadUiController.log("远程二维码识别结果:" + lstrResult, ThreadUiController.LOG_LEVEL.FATAL);
+                    if (lbRest)
                     {
-                        this.NotifyMaintanaceStaff("腾讯识别成功");
+                        this.NotifyMaintanaceStaff("远程二维码识别成功");
+                        ThreadUiController.log("远程二维码识别成功:"+lstrResult, ThreadUiController.LOG_LEVEL.FATAL);
                         this.TimeLastSucceed = DateTime.Now;
                     }
                     else if(this.NotifyMaintanaceStaff("二维码识别失败"))
                     {
+                        ThreadUiController.log("二维码识别失败", ThreadUiController.LOG_LEVEL.FATAL);
                         this.TimeLastSucceed = DateTime.Now;
                     }
                 }catch(Exception ex)
@@ -1921,7 +1938,8 @@
         private void 测试二维码ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var bitmap = new Bitmap(@"test.jpg");
-            String lstrRest = DetectByRemoteServer(bitmap);
+            String lstrRest = "";           
+            Boolean lbRet = DetectByRemoteServer(bitmap,ref lstrRest);
             Debug.WriteLine(lstrRest);
             if (String.IsNullOrEmpty(lstrRest))
             {
