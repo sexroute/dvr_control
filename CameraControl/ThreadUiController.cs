@@ -304,6 +304,11 @@ namespace EricZhao.UiThread
             }
             return (info.Length >= m_nLogFileSizeLimit);
         }
+
+        public static void Fatal(Exception e)
+        {
+            log(e.Message, LOG_LEVEL.FATAL, true);
+        }
         public static void Fatal(string astrlog)
         {
              log(astrlog, LOG_LEVEL.FATAL, true);

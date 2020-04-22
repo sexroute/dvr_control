@@ -26,6 +26,12 @@
     using Aliyun.Acs.Core.Exceptions;
     using Aliyun.Acs.Dysmsapi.Model.V20170525;
     using Newtonsoft.Json;
+    using TencentCloud.Common;
+    using TencentCloud.Common.Profile;
+    using TencentCloud.Cvm.V20170312;
+    using TencentCloud.Cvm.V20170312.Models;
+    using TencentCloud.Ocr.V20181119;
+    using TencentCloud.Ocr.V20181119.Models;
 
     public class Main : Form
     {
@@ -61,10 +67,11 @@
         private ToolStripMenuItem 输出设置ToolStripMenuItem;
         private ToolStripMenuItem 输入截图IToolStripMenuItem;
         private CameraControl cameraControl;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timerDetect;
         private ToolStripMenuItem testToolStripMenuItem;
         private ToolStripMenuItem autoSearchToolStripMenuItem;
-        private System.Windows.Forms.Timer timer2;
+        private System.Windows.Forms.Timer timerMaintance;
+        private ToolStripMenuItem 测试二维码ToolStripMenuItem;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -469,6 +476,7 @@
             this.保存截图PToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.测试二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -489,8 +497,8 @@
             this.labelCameraTitle = new System.Windows.Forms.Label();
             this.cameraControl = new Camera_NET.CameraControl();
             this.buttonUnZoom = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.timer2 = new System.Windows.Forms.Timer(this.components);
+            this.timerDetect = new System.Windows.Forms.Timer(this.components);
+            this.timerMaintance = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -565,8 +573,8 @@
             // testToolStripMenuItem
             // 
             this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autoSearchToolStripMenuItem});
-            this.testToolStripMenuItem.Enabled = false;
+            this.autoSearchToolStripMenuItem,
+            this.测试二维码ToolStripMenuItem});
             this.testToolStripMenuItem.Name = "testToolStripMenuItem";
             this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.testToolStripMenuItem.Text = "Test";
@@ -577,6 +585,13 @@
             this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.autoSearchToolStripMenuItem.Text = "Auto Search";
             this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
+            // 
+            // 测试二维码ToolStripMenuItem
+            // 
+            this.测试二维码ToolStripMenuItem.Name = "测试二维码ToolStripMenuItem";
+            this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.测试二维码ToolStripMenuItem.Text = "测试二维码";
+            this.测试二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试二维码ToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -787,7 +802,7 @@
             // buttonUnZoom
             // 
             this.buttonUnZoom.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonUnZoom.Font = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonUnZoom.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.buttonUnZoom.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.buttonUnZoom.Location = new System.Drawing.Point(13, 18);
             this.buttonUnZoom.Margin = new System.Windows.Forms.Padding(0);
@@ -801,17 +816,17 @@
             this.buttonUnZoom.Visible = false;
             this.buttonUnZoom.Click += new System.EventHandler(this.buttonUnZoom_Click);
             // 
-            // timer1
+            // timerDetect
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 500;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timerDetect.Enabled = true;
+            this.timerDetect.Interval = 500;
+            this.timerDetect.Tick += new System.EventHandler(this.timerDetect_Tick);
             // 
-            // timer2
+            // timerMaintance
             // 
-            this.timer2.Enabled = true;
-            this.timer2.Interval = 1000;
-            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            this.timerMaintance.Enabled = true;
+            this.timerMaintance.Interval = 1000;
+            this.timerMaintance.Tick += new System.EventHandler(this.timerMaintanace_Tick);
             // 
             // Main
             // 
@@ -991,12 +1006,72 @@
             this.TimeLastSucceed = DateTime.Now;
             ThreadUiController.Feed();
         }
-        
-        private void timer1_Tick(object sender, EventArgs e)
+
+
+
+        public String DetectByTencent(Bitmap apBitMap)
+        {
+            String lstrResult = "";
+            try
+            {
+                using(Bitmap lpBitMap = (Bitmap)apBitMap.Clone())
+                {
+
+                    Credential cred = new Credential
+                    {
+                        SecretId = "AKID6ynLdft8U0FF0IIFMCmAG6h1m13fBAZh",
+                        SecretKey = "0jSvkIakeZEfroUvtb3EGk00jDRO5d2j"
+                    };
+
+                    ClientProfile clientProfile = new ClientProfile();
+                    HttpProfile httpProfile = new HttpProfile();
+                    httpProfile.Endpoint = ("ocr.tencentcloudapi.com");
+                    clientProfile.HttpProfile = httpProfile;
+
+                    System.IO.MemoryStream ms = new MemoryStream();
+                    lpBitMap.Save(ms, ImageFormat.Jpeg);
+                    byte[] byteImage = ms.ToArray();
+                    var SigBase64 = Convert.ToBase64String(byteImage);
+
+                    OcrClient client = new OcrClient(cred, "ap-beijing", clientProfile);
+                    QrcodeOCRRequest req = new QrcodeOCRRequest();
+                    string strParams = "{\"ImageBase64\":\""+ SigBase64 + "\"}";
+                    req = QrcodeOCRRequest.FromJsonString<QrcodeOCRRequest>(strParams);
+                    QrcodeOCRResponse resp = client.QrcodeOCRSync(req);
+                    String lstrJson = AbstractModel.ToJsonString(resp);
+                    JObject json = JObject.Parse(lstrJson);
+                    lstrResult = (string)json["CodeResults"][0]["Url"];
+                    Console.WriteLine(lstrResult);
+                }
+                
+            }
+            catch (Exception e)
+            {
+                ThreadUiController.Fatal(e);
+            }
+
+            return lstrResult;
+        }
+
+        private String DetectByRemoteServer(Bitmap apBitMap)
+        {
+            String lstrResult = "";
+            try
+            {
+                lstrResult = DetectByTencent(apBitMap);
+            }catch(Exception e)
+            {
+                ThreadUiController.Fatal(e);
+            }
+
+            return lstrResult;
+        }
+
+
+        private Boolean DetectPatch(Boolean abDetectRemote)
         {
             Boolean lbEncodeSuccessfully = false;
-          
-           
+
             if (this.cameraControl.CameraCreated)
             {
 
@@ -1009,14 +1084,38 @@
                         {
                             //using (Bitmap bitMapGray = ToGray(bitmap))
                             {
-                                
-                                Result result = reader.Decode(bitmap);
-                                if (null != result)
+
+                                Result result = null;
+
+                                try
                                 {
-                                    this.textBoxZiMu.Text = result.Text;
+                                    result = reader.Decode(bitmap);
+                                }catch(Exception e)
+                                {
+                                    ThreadUiController.Fatal(e);
+                                }
+                              
+                                if (abDetectRemote)
+                                {
+                                    if (null == result || String.IsNullOrEmpty(result.Text))
+                                    {
+                                        String lstrRet = DetectByRemoteServer(bitmap);
+                                        if (lstrRet.ToUpper().CompareTo("OK".ToUpper()) == 0)
+                                        {
+                                            this.MarkScanSucceed();
+                                        }
+                                        this.PushData(result.Text);
+                                        lbEncodeSuccessfully = true;
+                                        this.AutoSearch = 2;
+                                    }
+                                }
+
+                               else if (null != result)
+                                {
+                                   
                                     if (!String.IsNullOrEmpty(result.Text))
                                     {
-                                        if(result.Text.ToUpper().CompareTo("OK".ToUpper())==0)
+                                        if (result.Text.ToUpper().CompareTo("OK".ToUpper()) == 0)
                                         {
                                             this.MarkScanSucceed();
                                         }
@@ -1027,7 +1126,7 @@
                                     this.AutoSearch = 2;
                                 }
                             }
-                           
+
 
                         }
                     }
@@ -1039,14 +1138,14 @@
                     // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
                 }
 
-                if(!lbEncodeSuccessfully)
+                if (!lbEncodeSuccessfully)
                 {
                     try
                     {
                         this.textBoxZiMu.Text = "";
                         this.UpdateCameraBitmap();
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
 
                     }
@@ -1054,6 +1153,13 @@
                 }
 
             }
+
+            return lbEncodeSuccessfully;
+        }
+        
+        private void timerDetect_Tick(object sender, EventArgs e)
+        {
+            DetectPatch(false);
         }
         String m_strRemoteServerUrl = "http://192.168.122.97:8180/?";
         public System.String RemoteServerUrl
@@ -1681,14 +1787,19 @@
 
         }
 
-        private void timer2_Tick(object sender, EventArgs e)
+        private void timerMaintanace_Tick(object sender, EventArgs e)
         {
            TimeSpan lpOffset = DateTime.Now - this.TimeLastSucceed;
             if(lpOffset.TotalSeconds>this.TimeSecondsThreshold)
             {
                 try
                 {
-                    if(this.NotifyMaintanaceStaff())
+                    Boolean lbRest = this.DetectPatch(true);
+                    if(lbRest)
+                    {
+                        this.TimeLastSucceed = DateTime.Now;
+                    }
+                    else if(this.NotifyMaintanaceStaff())
                     {
                         this.TimeLastSucceed = DateTime.Now;
                     }
@@ -1697,6 +1808,13 @@
                     ThreadUiController.log(ex.Message, ThreadUiController.LOG_LEVEL.FATAL);
                 }
             }
+        }
+
+        private void 测试二维码ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var bitmap = new Bitmap(@"test.jpg");
+            String lstrRest = DetectByRemoteServer(bitmap);
+            Debug.WriteLine(lstrRest);
         }
     }
 }
