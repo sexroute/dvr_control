@@ -575,6 +575,7 @@
             this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.autoSearchToolStripMenuItem,
             this.测试二维码ToolStripMenuItem});
+            this.testToolStripMenuItem.Enabled = false;
             this.testToolStripMenuItem.Name = "testToolStripMenuItem";
             this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.testToolStripMenuItem.Text = "Test";
@@ -582,14 +583,14 @@
             // autoSearchToolStripMenuItem
             // 
             this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
-            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autoSearchToolStripMenuItem.Text = "Auto Search";
             this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
             // 
             // 测试二维码ToolStripMenuItem
             // 
             this.测试二维码ToolStripMenuItem.Name = "测试二维码ToolStripMenuItem";
-            this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.测试二维码ToolStripMenuItem.Text = "测试二维码";
             this.测试二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试二维码ToolStripMenuItem_Click);
             // 
