@@ -1197,6 +1197,11 @@
 
 
                         }
+
+                        if(!lbEncodeSuccessfully)
+                        {
+                            bitmap.Save("error_temp.jpg");
+                        }
                     }
 
                 }
