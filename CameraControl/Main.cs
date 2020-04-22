@@ -74,6 +74,7 @@
         private ToolStripMenuItem 测试二维码ToolStripMenuItem;
         private ToolStripMenuItem 测试摄像头二维码ToolStripMenuItem;
         private ToolStripMenuItem 自动识别ToolStripMenuItem;
+        private ToolStripMenuItem 短信测试ToolStripMenuItem;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -479,6 +480,8 @@
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.测试二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.测试摄像头二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.自动识别ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -501,8 +504,7 @@
             this.buttonUnZoom = new System.Windows.Forms.Button();
             this.timerDetect = new System.Windows.Forms.Timer(this.components);
             this.timerMaintance = new System.Windows.Forms.Timer(this.components);
-            this.测试摄像头二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.自动识别ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.短信测试ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -580,6 +582,7 @@
             this.autoSearchToolStripMenuItem,
             this.测试二维码ToolStripMenuItem,
             this.测试摄像头二维码ToolStripMenuItem,
+            this.短信测试ToolStripMenuItem,
             this.自动识别ToolStripMenuItem});
             this.testToolStripMenuItem.Name = "testToolStripMenuItem";
             this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
@@ -599,6 +602,22 @@
             this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.测试二维码ToolStripMenuItem.Text = "测试文件二维码";
             this.测试二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试二维码ToolStripMenuItem_Click);
+            // 
+            // 测试摄像头二维码ToolStripMenuItem
+            // 
+            this.测试摄像头二维码ToolStripMenuItem.Name = "测试摄像头二维码ToolStripMenuItem";
+            this.测试摄像头二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.测试摄像头二维码ToolStripMenuItem.Text = "测试摄像头二维码";
+            this.测试摄像头二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试摄像头二维码ToolStripMenuItem_Click);
+            // 
+            // 自动识别ToolStripMenuItem
+            // 
+            this.自动识别ToolStripMenuItem.Checked = true;
+            this.自动识别ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.自动识别ToolStripMenuItem.Name = "自动识别ToolStripMenuItem";
+            this.自动识别ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.自动识别ToolStripMenuItem.Text = "自动识别";
+            this.自动识别ToolStripMenuItem.Click += new System.EventHandler(this.自动识别ToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -835,21 +854,12 @@
             this.timerMaintance.Interval = 1000;
             this.timerMaintance.Tick += new System.EventHandler(this.timerMaintanace_Tick);
             // 
-            // 测试摄像头二维码ToolStripMenuItem
+            // 短信测试ToolStripMenuItem
             // 
-            this.测试摄像头二维码ToolStripMenuItem.Name = "测试摄像头二维码ToolStripMenuItem";
-            this.测试摄像头二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.测试摄像头二维码ToolStripMenuItem.Text = "测试摄像头二维码";
-            this.测试摄像头二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试摄像头二维码ToolStripMenuItem_Click);
-            // 
-            // 自动识别ToolStripMenuItem
-            // 
-            this.自动识别ToolStripMenuItem.Checked = true;
-            this.自动识别ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.自动识别ToolStripMenuItem.Name = "自动识别ToolStripMenuItem";
-            this.自动识别ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.自动识别ToolStripMenuItem.Text = "自动识别";
-            this.自动识别ToolStripMenuItem.Click += new System.EventHandler(this.自动识别ToolStripMenuItem_Click);
+            this.短信测试ToolStripMenuItem.Name = "短信测试ToolStripMenuItem";
+            this.短信测试ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.短信测试ToolStripMenuItem.Text = "短信测试";
+            this.短信测试ToolStripMenuItem.Click += new System.EventHandler(this.短信测试ToolStripMenuItem_Click);
             // 
             // Main
             // 
@@ -1869,20 +1879,39 @@
             var bitmap = new Bitmap(@"test.jpg");
             String lstrRest = DetectByRemoteServer(bitmap);
             Debug.WriteLine(lstrRest);
-            this.textBoxZiMu.Text = lstrRest;
+            if (String.IsNullOrEmpty(lstrRest))
+            {
+                this.textBoxZiMu.Text = "文件二维码远程测试失败";
+            }
+            else
+            {
+                this.textBoxZiMu.Text = lstrRest;
+            }
         }
 
         private void 测试摄像头二维码ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             String lstrResult = "";
             Boolean lbRest = this.DetectPatch(true, out lstrResult);
-            this.textBoxZiMu.Text = lstrResult;
+            if (String.IsNullOrEmpty(lstrResult))
+            {
+                this.textBoxZiMu.Text = "摄像头二维码远程测试失败";
+            }
+            else
+            {
+                this.textBoxZiMu.Text = lstrResult;
+            }
         }
 
         private void 自动识别ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.自动识别ToolStripMenuItem.Checked = !this.自动识别ToolStripMenuItem.Checked;
             this.timerDetect.Enabled = this.自动识别ToolStripMenuItem.Checked;
+        }
+
+        private void 短信测试ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.NotifyMaintanaceStaff("短信测试");
         }
     }
 }
