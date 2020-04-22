@@ -72,6 +72,8 @@
         private ToolStripMenuItem autoSearchToolStripMenuItem;
         private System.Windows.Forms.Timer timerMaintance;
         private ToolStripMenuItem 测试二维码ToolStripMenuItem;
+        private ToolStripMenuItem 测试摄像头二维码ToolStripMenuItem;
+        private ToolStripMenuItem 自动识别ToolStripMenuItem;
         private ToolStripMenuItem 属性AToolStripMenuItem;
 
         public Main()
@@ -499,6 +501,8 @@
             this.buttonUnZoom = new System.Windows.Forms.Button();
             this.timerDetect = new System.Windows.Forms.Timer(this.components);
             this.timerMaintance = new System.Windows.Forms.Timer(this.components);
+            this.测试摄像头二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.自动识别ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -574,14 +578,16 @@
             // 
             this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.autoSearchToolStripMenuItem,
-            this.测试二维码ToolStripMenuItem});
-            this.testToolStripMenuItem.Enabled = false;
+            this.测试二维码ToolStripMenuItem,
+            this.测试摄像头二维码ToolStripMenuItem,
+            this.自动识别ToolStripMenuItem});
             this.testToolStripMenuItem.Name = "testToolStripMenuItem";
             this.testToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.testToolStripMenuItem.Text = "Test";
             // 
             // autoSearchToolStripMenuItem
             // 
+            this.autoSearchToolStripMenuItem.Enabled = false;
             this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
             this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autoSearchToolStripMenuItem.Text = "Auto Search";
@@ -591,7 +597,7 @@
             // 
             this.测试二维码ToolStripMenuItem.Name = "测试二维码ToolStripMenuItem";
             this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.测试二维码ToolStripMenuItem.Text = "测试二维码";
+            this.测试二维码ToolStripMenuItem.Text = "测试文件二维码";
             this.测试二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试二维码ToolStripMenuItem_Click);
             // 
             // statusStrip1
@@ -828,6 +834,22 @@
             this.timerMaintance.Enabled = true;
             this.timerMaintance.Interval = 1000;
             this.timerMaintance.Tick += new System.EventHandler(this.timerMaintanace_Tick);
+            // 
+            // 测试摄像头二维码ToolStripMenuItem
+            // 
+            this.测试摄像头二维码ToolStripMenuItem.Name = "测试摄像头二维码ToolStripMenuItem";
+            this.测试摄像头二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.测试摄像头二维码ToolStripMenuItem.Text = "测试摄像头二维码";
+            this.测试摄像头二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试摄像头二维码ToolStripMenuItem_Click);
+            // 
+            // 自动识别ToolStripMenuItem
+            // 
+            this.自动识别ToolStripMenuItem.Checked = true;
+            this.自动识别ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.自动识别ToolStripMenuItem.Name = "自动识别ToolStripMenuItem";
+            this.自动识别ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.自动识别ToolStripMenuItem.Text = "自动识别";
+            this.自动识别ToolStripMenuItem.Click += new System.EventHandler(this.自动识别ToolStripMenuItem_Click);
             // 
             // Main
             // 
@@ -1069,9 +1091,68 @@
         }
 
 
-        private Boolean DetectPatch(Boolean abDetectRemote)
+        private Boolean DetectPatch(Boolean abDetectRemote,out String astrResult)
         {
             Boolean lbEncodeSuccessfully = false;
+            astrResult = "";
+            if (this.cameraControl.CameraCreated)
+            {
+
+                try
+                {
+                    //  return;
+                    using (Bitmap bitmap = this.cameraControl.SnapshotSourceImage())
+                    {
+                        if (bitmap != null)
+                        {
+                            //using (Bitmap bitMapGray = ToGray(bitmap))
+                            {
+
+                                String lstrRet = DetectByRemoteServer(bitmap);
+                                if (lstrRet.ToUpper().CompareTo("OK".ToUpper()) == 0)
+                                {
+                                    this.MarkScanSucceed();
+                                }
+                                this.PushData(lstrRet);
+                                lbEncodeSuccessfully = true;
+                                this.AutoSearch = 2;
+                                astrResult = lstrRet;
+                            }
+
+
+                        }
+                    }
+
+                }
+                catch (Exception exception1)
+                {
+                    ThreadUiController.log(exception1.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                    // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
+                }
+
+                if (!lbEncodeSuccessfully)
+                {
+                    try
+                    {
+                        this.textBoxZiMu.Text = "";
+                        this.UpdateCameraBitmap();
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
+                }
+
+            }
+
+            return lbEncodeSuccessfully;
+        }
+        
+        private void timerDetect_Tick(object sender, EventArgs e)
+        {
+            Boolean lbEncodeSuccessfully = false;
+
 
             if (this.cameraControl.CameraCreated)
             {
@@ -1086,34 +1167,10 @@
                             //using (Bitmap bitMapGray = ToGray(bitmap))
                             {
 
-                                Result result = null;
-
-                                try
+                                Result result = reader.Decode(bitmap);
+                                if (null != result)
                                 {
-                                    result = reader.Decode(bitmap);
-                                }catch(Exception e)
-                                {
-                                    ThreadUiController.Fatal(e);
-                                }
-                              
-                                if (abDetectRemote)
-                                {
-                                    if (null == result || String.IsNullOrEmpty(result.Text))
-                                    {
-                                        String lstrRet = DetectByRemoteServer(bitmap);
-                                        if (lstrRet.ToUpper().CompareTo("OK".ToUpper()) == 0)
-                                        {
-                                            this.MarkScanSucceed();
-                                        }
-                                        this.PushData(result.Text);
-                                        lbEncodeSuccessfully = true;
-                                        this.AutoSearch = 2;
-                                    }
-                                }
-
-                               else if (null != result)
-                                {
-                                   
+                                    this.textBoxZiMu.Text = result.Text;
                                     if (!String.IsNullOrEmpty(result.Text))
                                     {
                                         if (result.Text.ToUpper().CompareTo("OK".ToUpper()) == 0)
@@ -1154,13 +1211,6 @@
                 }
 
             }
-
-            return lbEncodeSuccessfully;
-        }
-        
-        private void timerDetect_Tick(object sender, EventArgs e)
-        {
-            DetectPatch(false);
         }
         String m_strRemoteServerUrl = "http://192.168.122.97:8180/?";
         public System.String RemoteServerUrl
@@ -1720,7 +1770,7 @@
         const String accessKeyId = "LTAIZofTLpflOxi3";
         const String accessKeySecret = "Mrrr2lCy2HUXFcR9nBr6fTBhlWBLlb";
 
-        private Boolean  NotifyMaintanaceStaff()
+        private Boolean  NotifyMaintanaceStaff(String astrBody)
         {
             try
             {
@@ -1756,7 +1806,8 @@
                                                      "二维码识别", 
                                                      DateTime.Now.ToString(), 
                                                      1, 
-                                                     "二维码超过时间没有结果", 
+                                                    // "二维码超过时间没有结果", 
+                                                     astrBody,
                                                      this.TimeSecondsThreshold+"秒");
                     String lstrTemp1 = "{" + lstrTemp + "}";
                     request.TemplateParam = lstrTemp1;//"{\"plant\":\" 大连石化-三催化-P1001A\",\"time\":\"2018年2月9日14:35:25\",\"detail\":\"数据中断\",\"channel\":\"1H\"}";
@@ -1795,12 +1846,14 @@
             {
                 try
                 {
-                    Boolean lbRest = this.DetectPatch(true);
+                    String lstrResult = "";
+                    Boolean lbRest = this.DetectPatch(true,out lstrResult);
                     if(lbRest)
                     {
+                        this.NotifyMaintanaceStaff("腾讯识别成功");
                         this.TimeLastSucceed = DateTime.Now;
                     }
-                    else if(this.NotifyMaintanaceStaff())
+                    else if(this.NotifyMaintanaceStaff("二维码识别失败"))
                     {
                         this.TimeLastSucceed = DateTime.Now;
                     }
@@ -1816,6 +1869,20 @@
             var bitmap = new Bitmap(@"test.jpg");
             String lstrRest = DetectByRemoteServer(bitmap);
             Debug.WriteLine(lstrRest);
+            this.textBoxZiMu.Text = lstrRest;
+        }
+
+        private void 测试摄像头二维码ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            String lstrResult = "";
+            Boolean lbRest = this.DetectPatch(true, out lstrResult);
+            this.textBoxZiMu.Text = lstrResult;
+        }
+
+        private void 自动识别ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.自动识别ToolStripMenuItem.Checked = !this.自动识别ToolStripMenuItem.Checked;
+            this.timerDetect.Enabled = this.自动识别ToolStripMenuItem.Checked;
         }
     }
 }
