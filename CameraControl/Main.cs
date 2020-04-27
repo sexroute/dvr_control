@@ -1184,6 +1184,18 @@
 
 
                         }
+
+                        if(!lbEncodeSuccessfully)
+                        {
+                            try
+                            {
+                                bitmap.Save("finally_error_temp.jpg");
+                            }
+                            catch (Exception e)
+                            {
+                                ThreadUiController.Fatal(e);
+                            }
+                        }
                     }
 
                 }
@@ -1204,6 +1216,8 @@
                     {
 
                     }
+
+                   
 
                 }
 
