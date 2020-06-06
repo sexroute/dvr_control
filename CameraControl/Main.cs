@@ -1225,6 +1225,8 @@
 
             return lbEncodeSuccessfully;
         }
+
+        long m_lErrorCount = 0;
         
         private void timerDetect_Tick(object sender, EventArgs e)
         {
@@ -1267,7 +1269,13 @@
 
                         if(!lbEncodeSuccessfully)
                         {
-                            bitmap.Save("error_temp.jpg");
+                            if((DateTimeOffset.Now.ToUnixTimeMilliseconds()- this.m_lErrorCount)>200)
+                            {
+                                bitmap.Save("error_temp.jpg");
+                                this.m_lErrorCount = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            }
+                           
+                           
                         }
                     }
 
