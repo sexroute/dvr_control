@@ -501,6 +501,7 @@
             this.autoSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.测试二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.测试摄像头二维码ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.短信测试ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.自动识别ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -520,12 +521,11 @@
             this.labelResolutionTitle = new System.Windows.Forms.Label();
             this.comboBoxCameraList = new System.Windows.Forms.ComboBox();
             this.labelCameraTitle = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.cameraControl = new Camera_NET.CameraControl();
             this.buttonUnZoom = new System.Windows.Forms.Button();
             this.timerDetect = new System.Windows.Forms.Timer(this.components);
             this.timerMaintance = new System.Windows.Forms.Timer(this.components);
-            this.短信测试ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -614,30 +614,37 @@
             // 
             this.autoSearchToolStripMenuItem.Enabled = false;
             this.autoSearchToolStripMenuItem.Name = "autoSearchToolStripMenuItem";
-            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.autoSearchToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.autoSearchToolStripMenuItem.Text = "Auto Search";
             this.autoSearchToolStripMenuItem.Click += new System.EventHandler(this.autoSearchToolStripMenuItem_Click);
             // 
             // 测试二维码ToolStripMenuItem
             // 
             this.测试二维码ToolStripMenuItem.Name = "测试二维码ToolStripMenuItem";
-            this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.测试二维码ToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.测试二维码ToolStripMenuItem.Text = "测试文件二维码";
             this.测试二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试二维码ToolStripMenuItem_Click);
             // 
             // 测试摄像头二维码ToolStripMenuItem
             // 
             this.测试摄像头二维码ToolStripMenuItem.Name = "测试摄像头二维码ToolStripMenuItem";
-            this.测试摄像头二维码ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.测试摄像头二维码ToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.测试摄像头二维码ToolStripMenuItem.Text = "测试摄像头二维码";
             this.测试摄像头二维码ToolStripMenuItem.Click += new System.EventHandler(this.测试摄像头二维码ToolStripMenuItem_Click);
+            // 
+            // 短信测试ToolStripMenuItem
+            // 
+            this.短信测试ToolStripMenuItem.Name = "短信测试ToolStripMenuItem";
+            this.短信测试ToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.短信测试ToolStripMenuItem.Text = "短信测试";
+            this.短信测试ToolStripMenuItem.Click += new System.EventHandler(this.短信测试ToolStripMenuItem_Click);
             // 
             // 自动识别ToolStripMenuItem
             // 
             this.自动识别ToolStripMenuItem.Checked = true;
             this.自动识别ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.自动识别ToolStripMenuItem.Name = "自动识别ToolStripMenuItem";
-            this.自动识别ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.自动识别ToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.自动识别ToolStripMenuItem.Text = "自动识别";
             this.自动识别ToolStripMenuItem.Click += new System.EventHandler(this.自动识别ToolStripMenuItem_Click);
             // 
@@ -839,6 +846,14 @@
             this.labelCameraTitle.TabIndex = 5;
             this.labelCameraTitle.Text = "摄像头选择：";
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(336, 328);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(308, 181);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            // 
             // cameraControl
             // 
             this.cameraControl.DirectShowLogFilepath = "";
@@ -876,21 +891,6 @@
             this.timerMaintance.Enabled = true;
             this.timerMaintance.Interval = 1000;
             this.timerMaintance.Tick += new System.EventHandler(this.timerMaintanace_Tick);
-            // 
-            // 短信测试ToolStripMenuItem
-            // 
-            this.短信测试ToolStripMenuItem.Name = "短信测试ToolStripMenuItem";
-            this.短信测试ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.短信测试ToolStripMenuItem.Text = "短信测试";
-            this.短信测试ToolStripMenuItem.Click += new System.EventHandler(this.短信测试ToolStripMenuItem_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Location = new System.Drawing.Point(336, 328);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(308, 181);
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
             // 
             // Main
             // 
@@ -1232,7 +1232,7 @@
         {
             Boolean lbEncodeSuccessfully = false;
 
-
+            Boolean lbShouldUpdateWindows = false;
             if (this.cameraControl.CameraCreated)
             {
 
@@ -1273,8 +1273,8 @@
                             {
                                 bitmap.Save("error_temp.jpg");
                                 this.m_lErrorCount = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            }
-                           
+                                lbShouldUpdateWindows = true;
+                            }                          
                            
                         }
                     }
@@ -1282,7 +1282,7 @@
                 }
                 catch (Exception exception1)
                 {
-                    ThreadUiController.log(exception1.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                    //ThreadUiController.log(exception1.Message, ThreadUiController.LOG_LEVEL.FATAL);
                     // MessageBox.Show(exception1.Message, "Error while getting a snapshot");
                 }
 
@@ -1291,7 +1291,11 @@
                     try
                     {
                         this.textBoxZiMu.Text = "";
-                        this.UpdateCameraBitmap(false);
+                       if(lbShouldUpdateWindows)
+                        {
+                            this.UpdateCameraBitmap(false);
+                        }
+                       
                     }
                     catch (Exception ex)
                     {
