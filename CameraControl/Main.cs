@@ -1269,7 +1269,7 @@
 
                         if(!lbEncodeSuccessfully)
                         {
-                            if((DateTimeOffset.Now.ToUnixTimeMilliseconds()- this.m_lErrorCount)>200)
+                            if((DateTimeOffset.Now.ToUnixTimeMilliseconds()- this.m_lErrorCount)>1000)
                             {
                                 bitmap.Save("error_temp.jpg");
                                 this.m_lErrorCount = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -1645,11 +1645,134 @@
             }
         }
 
+        public Boolean ShouldPostData(String astrata)
+        {
+            Boolean lbShouldPost = true;
+            try
+            {
+                //1.check if vib point
+                astrata = astrata.ToLower();
+                int lnIndex = astrata.IndexOf("um");
+                Boolean lbIsVibPoint = false;
+                if(lnIndex>=0)
+                {
+                    lbIsVibPoint = true;
+                }
+                else
+                {
+                    lnIndex = astrata.IndexOf("mil");
+                    if (lnIndex >= 0)
+                    {
+                        lbIsVibPoint = true;
+                    }else
+                    {
+                        lnIndex = astrata.IndexOf("mm");
+                        if (lnIndex >= 0)
+                        {
+                            lbIsVibPoint = true;
+                        }
+                    }    
+                }
+
+
+                //2.check if sud message
+                Newtonsoft.Json.Linq.JArray array = null;
+                Boolean lbIsSudMessage = false;
+                try
+                {
+                    array = Newtonsoft.Json.Linq.JArray.Parse(astrata);
+                    
+                }
+                catch (Exception e)
+                {
+                    ThreadUiController.log("Parsing data Error:" + astrata, ThreadUiController.LOG_LEVEL.FATAL);
+                    ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);                   
+                }
+
+                foreach (JObject obj in array.Children<JObject>())
+                {
+                    foreach (JProperty property in obj.Properties())
+                    {
+                        string name = property.Name;
+                        string value = property.Value.ToString();
+
+                        if (property.Name == "alarmid")
+                        {
+                            lbIsSudMessage = true;
+                            break;
+                        }
+                      
+                    }
+                }
+
+                //3.check if Regular alarm message
+                Boolean lbIsRegularAlarmMessage = false;
+                double ldblHH = -1000.0;
+                double ldblHL = -1000.0;
+                double ldblCurrentValue = -1100.0;
+                try
+                {
+                    array = Newtonsoft.Json.Linq.JArray.Parse(astrata);
+
+                }
+                catch (Exception e)
+                {
+                    ThreadUiController.log("Parsing data Error:" + astrata, ThreadUiController.LOG_LEVEL.FATAL);
+                    ThreadUiController.log(e.Message, ThreadUiController.LOG_LEVEL.FATAL);
+                }
+
+                foreach (JObject obj in array.Children<JObject>())
+                {
+                    foreach (JProperty property in obj.Properties())
+                    {
+                        string name = property.Name;
+                        string value = property.Value.ToString();
+
+                        if (property.Name == "hh")
+                        {
+                            ldblHH = double.Parse(value);
+                        }else if (property.Name == "hl")
+                        {
+                            ldblHL = double.Parse(value);
+                        }else if (property.Name == "val")
+                        {
+                            ldblCurrentValue = double.Parse(value);
+                        }
+                    }
+                }
+
+                if((ldblCurrentValue>ldblHH && ldblHH>0) || (ldblCurrentValue>ldblHL&&ldblHL>0))
+                {
+                    lbIsRegularAlarmMessage = true;
+                }
+
+                //4. is vib and regular alarm message  Or is sud message should be sent
+                if((lbIsRegularAlarmMessage && lbIsVibPoint) || (lbIsSudMessage))
+                {
+                    lbShouldPost = true;
+                }else
+                {
+                    lbShouldPost = false;
+                }
+            }
+            catch(Exception e)
+            {
+                lbShouldPost = true;
+                ThreadUiController.Error(e.Message);
+            }
+
+            return lbShouldPost;
+        }
+
         public Boolean PostDataToRemoteServer2(String astrata,String astrUrl)
         {
             Boolean lbSucceed = false;
             try
             {
+                if(!ShouldPostData(astrata))
+                {
+                    return true;
+                }
                 using (var client = new HttpClient())                {
 
                     var data = new System.Net.Http.StringContent(astrata, Encoding.UTF8, "application/json");
