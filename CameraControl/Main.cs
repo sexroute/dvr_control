@@ -1708,9 +1708,19 @@
                         string name = property.Name;
                         string value = property.Value.ToString();
 
-                        if (property.Name == "alarmid")
+                        if (property.Name == "alarmstatus")
                         {
-                            lbIsSudMessage = true;
+                            try
+                            {
+                                int lnAlarmStatus = int.Parse(value);
+                                if(lnAlarmStatus ==9 || lnAlarmStatus == 10)
+                                {
+                                    lbIsSudMessage = true;
+                                }
+                            }catch(Exception e)
+                            {
+                                ThreadUiController.Error(e.Message);
+                            }
                             break;
                         }
                       
