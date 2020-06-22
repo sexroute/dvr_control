@@ -1307,6 +1307,13 @@
             }
         }
         String m_strRemoteServerUrl = "http://192.168.122.97:8180/?";
+
+        int m_nIsEnableMessageFilter = 0;
+        public int IsEnableMessageFilter
+        {
+            get { lock (this) return m_nIsEnableMessageFilter; }
+            set { lock (this) m_nIsEnableMessageFilter = value; }
+        }
         public System.String RemoteServerUrl
         {
             get { lock (this) return m_strRemoteServerUrl; }
@@ -1436,6 +1443,7 @@
                 this.TimeSecondsThreshold = this.SettingsFile.IniReadIntValue("setting", "succeed_time_sencond_threshold", 100, true);
                 this.MaintainacePhone = this.SettingsFile.IniReadStringValue("setting", "maintanace_phone", this.MaintainacePhone, true);
                 this.SMSTag = this.SettingsFile.IniReadStringValue("setting", "maintanace_sms_tag", this.SMSTag, true);
+                this.IsEnableMessageFilter = this.SettingsFile.IniReadIntValue("setting", "enable_message_filter", 0, true);
             }
 
             this.loadDataFromLocalStorage();
@@ -1647,6 +1655,10 @@
 
         public Boolean ShouldPostData(String astrata)
         {
+            if(IsEnableMessageFilter<=0)
+            {
+                return true;
+            }
             Boolean lbShouldPost = true;
             try
             {
